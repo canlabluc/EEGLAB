@@ -1,0 +1,18 @@
+
+ADJUST - Automatic EEG artifact Detection with Joint Use of Spatial and Temporal features
+
+This package runs in EEGLAB.
+Please copy this folder into your EEGLAB plugins directory, e.g. here:
+
+/home/[...]/eeglab13_1_1b/plugins/
+
+and then run EEGLAB; ADJUST should appear in the menu Tools -> ADJUST1.1.
+NOTE: Perform ICA before running ADJUST. ICA is a necessary step.
+
+
+2009-2014 Andrea Mognon (1) and Marco Buiatti (2)
+(1) Center for Mind/Brain Sciences, University of Trento, Italy
+(2) INSERM-CEA Cognitive Neuroimaging Unit, Gif sur Yvette, France
+
+Support contact: adjust.staff@gmail.com
+
