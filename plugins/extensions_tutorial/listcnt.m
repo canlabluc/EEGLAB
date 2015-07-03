@@ -10,6 +10,7 @@ savepath   = uigetdir('C:\Users\canlab\Documents\MATLAB\', 'Select folder to exp
 if savepath == 0
     error('Error: Please specify the folder to save the imported files to.');
 end
+
 filelist = dir(fullfile(strcat(importpath, '/*.cnt')));
 for i = 1:numel(filelist)
     EEG = pop_loadcnt(strcat(importpath, '/', filelist(i).name), 'blockread', 1);

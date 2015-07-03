@@ -21,5 +21,6 @@ menu = findobj(fig, 'tag', 'import data');
 
 % menu callbacks
 % --------------
-uimenu( menu, 'label', 'CANLAB: Import multiple .cnt files', 'callback', 'cl_importcnt');
+
+uimenu( menu, 'label', 'CANLAB: Import multiple CNT', 'callback', 'cl_importcnt');
 end
