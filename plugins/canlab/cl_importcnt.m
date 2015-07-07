@@ -6,10 +6,12 @@ importpath = uigetdir('C:\Users\canlab\Documents\MATLAB\', 'Select folder to imp
 if importpath == 0
     error('Error: Please specify the folder that contains the .cnt files.');
 end
-savepath   = uigetdir('C:\Users\canlab\Documents\MATLAB\', 'Select folder to export to');
-if savepath == 0
-    error('Error: Please specify the folder to save the imported files to.');
+fprintf('Import path: %s\n', importpath);
+exportpath   = uigetdir('C:\Users\canlab\Documents\MATLAB\', 'Select folder to export to');
+if exportpath == 0
+    error('Error: Please specify the folder to export the .set files to.');
 end
+fprintf('Export path: %s\n', exportpath);
 
 filelist = dir(fullfile(strcat(importpath, '/*.cnt')));
 for i = 1:numel(filelist)
@@ -17,6 +19,6 @@ for i = 1:numel(filelist)
     EEG.setname = filelist(i).name(1:9);
     %EEG.comments = pop_comments( {'Original file: ', strcat(pwd, '/', filelist(i).name) } );
     [ALLEEG, EEG, CURRENTSET] = eeg_store(ALLEEG, EEG);
-    EEG = pop_saveset( EEG, 'filename', filelist(i).name(1:9), 'filepath', savepath, 'savemode', 'onefile' );
+    EEG = pop_saveset( EEG, 'filename', filelist(i).name(1:9), 'filepath', exportpath, 'savemode', 'onefile' );
 end
 eeglab redraw
