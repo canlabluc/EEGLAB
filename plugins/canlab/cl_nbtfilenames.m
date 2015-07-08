@@ -16,6 +16,7 @@ for id = 1:numel(files)
     copyfile(strcat(importpath, '/', files(id).name), strcat(exportpath, ...
         sprintf('/%s%s.%s.yyyymmdd.RS.set', study, session, subject)));
 end
+clearvars(importpath, exportpath, files);
     
     
     
