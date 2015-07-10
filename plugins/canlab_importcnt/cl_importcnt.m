@@ -1,5 +1,5 @@
 % This script utilizes the pop_loadcnt() function to import all of the cnt
-% files in the current working directory using a blockread setting of 1.
+% files in the directory specified by the user using a blockread setting of 1.
 % All .cnt files are added to the ALLEEG struct array. 
 
 importpath = uigetdir('C:\Users\canlab\Documents\MATLAB\', 'Select folder to import from');
