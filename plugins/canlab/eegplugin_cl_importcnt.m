@@ -1,4 +1,4 @@
-function eegplugin_cl_importcnt( fig, try_strings, catch_strings );
+function eegplugin_cl_importcnt( fig, try_strings, catch_strings )
 % This plugin utilizes the pop_loadcnt() function to import cnt files from
 % a directory specified by the user. Each dataset is added to the ALLEEG
 % object, and saved as a .set file to another directory also specified by
