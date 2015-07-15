@@ -12,13 +12,13 @@ files = dir(fullfile(strcat(importpath, '/*.set')));
 %   TODO: Create GUI that allows user to easily select bad channels
 %disp('Select the channels that you would like to exclude: ');
 %disp(EEG.chaninfo.filecontent);
-clinicalCh = [3 4 5 9 11 12 13 14 17 18 19 20 21 22 23 24 25 28 30 32 34 35 37 38 39 41 42 43 44 45 47 48 49 50 51 52 53 54 57 59 61 63 64 65 66];
+clinicalCh = [66 65 64 63 61 59 57 54 53 52 51 50 49 48 47 45 44 43 42 41 39 38 37 35 34 32 30 28 25 24 23 22 21 20 19 18 17 14 13 12 11 9 5 4 3];
 for id = 1:numel(files)
     EEG = pop_loadset(files(id).name, importpath);
     % Now we remove selected data channels from all of the datasets.
     % pop_select removes the channels from the actual data, whereas
     % pop_chanedit removes the channels from the EEG struct
-    for ChId = 1:numel(clinicalCh)
+    for ChId = numel(clinicalCh):1
         EEG.chanlocs(clinicalCh(ChId)) = [];
         EEG.data(clinicalCh(ChId)) = [];
     end
