@@ -1,7 +1,7 @@
 % This script converts a folder full of EEGLAB .set files into the naming
 % system that NBT uses:
 %   <ProjectID>.<SubjectID>.<Date of recording>.<Condition>
-%   NBT.S0099.20090212.EOR2.
+%   e.g., NBT.S0099.20090212.EOR2.
 
 importpath = uigetdir('/home/sopu', 'Select folder to import from');
 exportpath = uigetdir('/home/sopu', 'Select foler to export to');
@@ -15,4 +15,4 @@ for id = 1:numel(files)
     subject = files(id).name(7:9);
     copyfile(strcat(importpath, '/', files(id).name), strcat(exportpath, ...
         sprintf('/%s%s.%s.yyyymmdd.RS.set', study, session, subject)));
-end   
+end  
