@@ -29,14 +29,15 @@ for i = 1:numel(files)
     % power ratios.
     sampRate = 512;
     disp('Computing PSD');
-    [power, freq] = spectopo(mean(Signal'), 0, sampRate);
+    [power, freq] = spectopo(mean(Signal'), 0, sampRate, 'plot', 'off');
     subj{i}.mean_thetaPower = mean(power(freq >= subj{i}.Theta_floor & freq <= subj{i}.meanTF));
     subj{i}.mean_alpha1Power = mean(power(freq >= subj{i}.meanTF & freq <= subj{i}.Alpha2_floor));
     subj{i}.mean_alpha2Power = mean(power(freq >= subj{i}.Alpha2_floor & freq <= subj{i}.meanIAF));
     subj{i}.mean_alpha3Power = mean(power(freq >= subj{i}.meanIAF & freq <= subj{i}.Alpha3_roof));
-    
+    subj{i}.power = power;
+    subj{i}.freq  = freq;
     subj{i}.ratio_mean_alpha32 = subj{i}.mean_alpha3Power / subj{i}.mean_alpha2Power;
-    save(strcat('subj', SignalInfo.subjectID, date, '.mat'), 'subj{i}');
+    %save(strcat('subj', SignalInfo.subjectID, date, '.mat'), 'subj{i}');
 end
 save('complete_struct.mat', 'subj');
 
