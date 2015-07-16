@@ -54,13 +54,13 @@ for i = 1:numel(files)
     subj{i}.Alpha3_ceiling = subj{i}.meanIAF + 2;
     % Compute power across derived bands
     subj{i}.mean_thetaPower  = mean(power(freq >= subj{i}.Theta_floor & freq <= subj{i}.meanTF));
-    subj{i}.mean_alphaPower  = mean(power(freq >= subj{i}.TF & freq <= subj{i}.Alpha3_ceiling));
+    subj{i}.mean_alphaPower  = mean(power(freq >= subj{i}.meanTF & freq <= subj{i}.Alpha3_ceiling));
     subj{i}.mean_alpha1Power = mean(power(freq >= subj{i}.meanTF & freq <= subj{i}.Alpha2_floor));
     subj{i}.mean_alpha2Power = mean(power(freq >= subj{i}.Alpha2_floor & freq <= subj{i}.meanIAF));
     subj{i}.mean_alpha3Power = mean(power(freq >= subj{i}.meanIAF & freq <= subj{i}.Alpha3_ceiling));
     % Compute ratios
     subj{i}.ratio_meanAlpha32    = subj{i}.mean_alpha3Power / subj{i}.mean_alpha2Power;
-    subj{i}.ratio_meanAlphaTheta = subj{i}.mean_alphaPower / mean_thetaPower;
+    subj{i}.ratio_meanAlphaTheta = subj{i}.mean_alphaPower / subj{i}.mean_thetaPower;
 end
 name = strcat(date, '-results', '.mat');
 save(name, 'subj');
