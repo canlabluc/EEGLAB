@@ -16,12 +16,7 @@ clinicalCh = [66 65 64 63 61 59 57 54 53 52 51 50 49 48 47 45 44 43 42 41 39 38 
 for id = 1:numel(files)
     EEG = pop_loadset(files(id).name, importpath);
     % Now we remove selected data channels from all of the datasets.
-    % pop_select removes the channels from the actual data, whereas
-    % pop_chanedit removes the channels from the EEG struct
-    for ChId = numel(clinicalCh):1
-        EEG.chanlocs(clinicalCh(ChId)) = [];
-        EEG.data(clinicalCh(ChId)) = [];
-    end
+    EEG = pop_select(EEG, 'nochannel', clinicalCh);
     pop_saveset(EEG, 'filename', files(id).name(1:end-4), 'filepath',...
         exportpath, 'savemode', 'onefile');
 end

@@ -17,4 +17,7 @@ for id = 1:numel(files)
     copyfile(strcat(importpath, '/', files(id).name), strcat(exportpath, ...
         sprintf('/%s%s.%s.yyyymmdd.RS.set', study, session, subject)));
 end
+% Add NBT to the path in order to make sure that we can use nbt_import_files
+cd ~/nbt;
+installNBT;
 nbt_import_files(strcat(exportpath,'/'), strcat(exportpath2,'/'));
