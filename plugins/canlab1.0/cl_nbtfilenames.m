@@ -3,8 +3,9 @@
 %   <ProjectID>.<SubjectID>.<Date of recording>.<Condition>
 %   e.g., NBT.S0099.20090212.EOR2.
 
-importpath = uigetdir('/home/sopu', 'Select folder to import from');
-exportpath = uigetdir('/home/sopu', 'Select foler to export to');
+importpath = uigetdir('~', 'Select folder to import from');
+exportpath = uigetdir('~', 'Select folder to export to');
+exportpath2 = uigetdir('~', 'Select folder to export to');
 if importpath == 0
     error('Error: Please select the importing directory');
 end
@@ -15,4 +16,5 @@ for id = 1:numel(files)
     subject = files(id).name(7:9);
     copyfile(strcat(importpath, '/', files(id).name), strcat(exportpath, ...
         sprintf('/%s%s.%s.yyyymmdd.RS.set', study, session, subject)));
-end  
+end
+nbt_import_files(strcat(exportpath,'/'), strcat(exportpath2,'/'));
