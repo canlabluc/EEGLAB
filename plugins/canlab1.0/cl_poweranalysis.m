@@ -1,24 +1,24 @@
 % This script utilizes nbt_doPeakFit and EEGLAB's spectopo() function to calculate the mean
 % power ratio for power bands derived from calculating the TF and IAF. 
 
-importpath = uigetdir('C:\Users\canlab\Documents\MATLAB\', 'Select folder to import from');
+importpath = uigetdir('~', 'Select folder to import from (contains .mat files)');
 if importpath == 0
     error('Error: Please specify the folder that contains the .set files.');
 end
 fprintf('Import path: %s\n', importpath);
-exportpath = uigetdir('C:\Users\canlab\Documents\MATLAB\', 'Select folder to export results to');
+exportpath = uigetdir('~', 'Select folder to export resulting struct to');
 if exportpath == 0
     error('Error: Please specify the folder to export results files to.');
 end
+fprintf('Export path: %s\n', exportpath);
 
 files = dir(fullfile(strcat(importpath, '/*S.mat')));
 subj{size(files, 1)} = [];
-
 for i = 1:numel(files)
     [Signal, SignalInfo, path] = nbt_load_file(strcat(importpath, '/', files(i).name));
-    [power, freq] = spectopo(mean(Signal'), 0, 512, 'plot', 'off');
+    [spectra, freq] = spectopo(mean(Signal'), 0, 512, 'plot', 'off', 'freqrange', [0 45]);
     subj{i}.SubjectID = files(i).name;
-    subj{i}.power = power;
+    subj{i}.spectra = spectra; % Note that units are 10*log10(amp^2)
     subj{i}.freq = freq;
     
     % ---- FIXED FREQUENCY BANDS ---- %
@@ -38,15 +38,16 @@ for i = 1:numel(files)
     subj{i}.fixedBeta_ceiling   = 30;
     subj{i}.fixedGamma_floor    = 30;
     subj{i}.Gamma_ceiling       = 45; % Gamma ceiling is 45 Hz for fixed and IAF-based bands
-    % Calculate power across fixed (traditional) frequency bands
-    subj{i}.mean_fdeltaPower  = mean(power(freq >= subj{i}.fixedDelta_floor & freq <= subj{i}.fixedDelta_ceiling));
-    subj{i}.mean_fthetaPower  = mean(power(freq >= subj{i}.fixedTheta_floor & freq <= subj{i}.fixedTheta_ceiling));
-    subj{i}.mean_falphaPower  = mean(power(freq >= subj{i}.fixedAlpha_floor & freq <= subj{i}.fixedAlpha_ceiling));
-    subj{i}.mean_fbetaPower   = mean(power(freq >= subj{i}.fixedBeta_floor & freq <= subj{i}.fixedBeta_ceiling));
-    subj{i}.mean_fgammaPower  = mean(power(freq >= subj{i}.fixedGamma_floor & freq <= subj{i}.Gamma_ceiling));
-    subj{i}.mean_falpha1Power = mean(power(freq >= subj{i}.fixedAlpha1_floor & freq <= subj{i}.fixedAlpha1_ceiling));
-    subj{i}.mean_falpha2Power = mean(power(freq >= subj{i}.fixedAlpha2_floor & freq <= subj{i}.fixedAlpha2_ceiling));
-    subj{i}.mean_falpha3Power = mean(power(freq >= subj{i}.fixedAlpha3_floor & freq <= subj{i}.fixedAlpha3_ceiling));
+    
+    % Calculate absolute power (amplitude^2) across fixed (traditional) frequency bands
+    subj{i}.mean_fdeltaPower  = mean(10.^(spectra(freq >= subj{i}.fixedDelta_floor & freq <= subj{i}.fixedDelta_ceiling)/10));
+    subj{i}.mean_fthetaPower  = mean(10.^(spectra(freq >= subj{i}.fixedTheta_floor & freq <= subj{i}.fixedTheta_ceiling)/10));
+    subj{i}.mean_falphaPower  = mean(10.^(spectra(freq >= subj{i}.fixedAlpha_floor & freq <= subj{i}.fixedAlpha_ceiling)/10));
+    subj{i}.mean_fbetaPower   = mean(10.^(spectra(freq >= subj{i}.fixedBeta_floor & freq <= subj{i}.fixedBeta_ceiling)/10));
+    subj{i}.mean_fgammaPower  = mean(10.^(spectra(freq >= subj{i}.fixedGamma_floor & freq <= subj{i}.Gamma_ceiling)/10));
+    subj{i}.mean_falpha1Power = mean(10.^(spectra(freq >= subj{i}.fixedAlpha1_floor & freq <= subj{i}.fixedAlpha1_ceiling)/10));
+    subj{i}.mean_falpha2Power = mean(10.^(spectra(freq >= subj{i}.fixedAlpha2_floor & freq <= subj{i}.fixedAlpha2_ceiling)/10));
+    subj{i}.mean_falpha3Power = mean(10.^(spectra(freq >= subj{i}.fixedAlpha3_floor & freq <= subj{i}.fixedAlpha3_ceiling)/10));
 
     % ---- FREQUENCY BANDS DERIVED FROM IAF & TF ---- %
     subj{i}.peakFit = nbt_doPeakFit(Signal, SignalInfo);
@@ -84,12 +85,12 @@ for i = 1:numel(files)
     % -- Gamma ceiling already set
     
     % Compute power across derived bands
-    subj{i}.mean_DeltaPower  = mean(power(freq >= subj{i}.Delta_floor & freq <= subj{i}.Delta_ceiling));
-    subj{i}.mean_thetaPower  = mean(power(freq >= subj{i}.Theta_floor & freq <= subj{i}.Theta_ceiling));
-    subj{i}.mean_alphaPower  = mean(power(freq >= subj{i}.Alpha_floor & freq <= subj{i}.Alpha_ceiling));
-    subj{i}.mean_alpha1Power = mean(power(freq >= subj{i}.meanTF & freq <= subj{i}.Alpha2_floor));
-    subj{i}.mean_alpha2Power = mean(power(freq >= subj{i}.Alpha2_floor & freq <= subj{i}.meanIAF));
-    subj{i}.mean_alpha3Power = mean(power(freq >= subj{i}.meanIAF & freq <= subj{i}.Alpha3_ceiling));
+    subj{i}.mean_DeltaPower  = mean(10.^(spectra(freq >= subj{i}.Delta_floor & freq <= subj{i}.Delta_ceiling)/10));
+    subj{i}.mean_thetaPower  = mean(10.^(spectra(freq >= subj{i}.Theta_floor & freq <= subj{i}.Theta_ceiling)/10));
+    subj{i}.mean_alphaPower  = mean(10.^(spectra(freq >= subj{i}.Alpha_floor & freq <= subj{i}.Alpha_ceiling)/10));
+    subj{i}.mean_alpha1Power = mean(10.^(spectra(freq >= subj{i}.meanTF & freq <= subj{i}.Alpha2_floor)/10));
+    subj{i}.mean_alpha2Power = mean(10.^(spectra(freq >= subj{i}.Alpha2_floor & freq <= subj{i}.meanIAF)/10));
+    subj{i}.mean_alpha3Power = mean(10.^(spectra(freq >= subj{i}.meanIAF & freq <= subj{i}.Alpha3_ceiling)/10));
     
     % Compute ratios using both fixed and calculated bands
     subj{i}.ratio_meanAlpha32Fixed    = subj{i}.mean_falpha3Power / subj{i}.mean_falpha2Power;
@@ -97,6 +98,6 @@ for i = 1:numel(files)
     subj{i}.ratio_meanAlpha32    = subj{i}.mean_alpha3Power / subj{i}.mean_alpha2Power;
     subj{i}.ratio_meanAlphaTheta = subj{i}.mean_alphaPower / subj{i}.mean_thetaPower;
 end
-name = strcat(date, '-results', '.mat');
-save(name, 'subj');
+structFile = strcat(exportpath, '/', date, '-results', '.mat');
+save(structFile, 'subj');
 
