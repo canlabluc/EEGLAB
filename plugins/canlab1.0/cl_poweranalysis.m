@@ -43,7 +43,7 @@ for i = 1:numel(files)
     subj{i}.mean_fthetaPower  = mean(power(freq >= subj{i}.fixedTheta_floor & freq <= subj{i}.fixedTheta_ceiling));
     subj{i}.mean_falphaPower  = mean(power(freq >= subj{i}.fixedAlpha_floor & freq <= subj{i}.fixedAlpha_ceiling));
     subj{i}.mean_fbetaPower   = mean(power(freq >= subj{i}.fixedBeta_floor & freq <= subj{i}.fixedBeta_ceiling));
-    subj{i}.mean_fgammaPower  = mean(power(freq >= subj{i}.fixedGamma_floor & freq <= subj{i}.fixedGamma_ceiling));
+    subj{i}.mean_fgammaPower  = mean(power(freq >= subj{i}.fixedGamma_floor & freq <= subj{i}.Gamma_ceiling));
     subj{i}.mean_falpha1Power = mean(power(freq >= subj{i}.fixedAlpha1_floor & freq <= subj{i}.fixedAlpha1_ceiling));
     subj{i}.mean_falpha2Power = mean(power(freq >= subj{i}.fixedAlpha2_floor & freq <= subj{i}.fixedAlpha2_ceiling));
     subj{i}.mean_falpha3Power = mean(power(freq >= subj{i}.fixedAlpha3_floor & freq <= subj{i}.fixedAlpha3_ceiling));
