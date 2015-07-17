@@ -112,7 +112,7 @@ for i = 1:numel(files)
     subj{i}.mean_fthetaPower  = nanmean(10.^(avgPSD(avgFreq >= subj{i}.fixedTheta_floor  & avgFreq <= subj{i}.fixedTheta_ceiling)/10));
     subj{i}.mean_falphaPower  = nanmean(10.^(avgPSD(avgFreq >= subj{i}.fixedAlpha_floor  & avgFreq <= subj{i}.fixedAlpha_ceiling)/10));
     subj{i}.mean_fbetaPower   = nanmean(10.^(avgPSD(avgFreq >= subj{i}.fixedBeta_floor   & avgFreq <= subj{i}.fixedBeta_ceiling)/10));
-    subj{i}.mean_fgammaPower  = nanmean(10.^(avgPSD(avgFreq >= subj{i}.fixedGamma_floor  & avgFreq <= subj{i}.Gamma_ceiling)/10));
+    subj{i}.mean_fgammaPower  = nanmean(10.^(avgPSD(avgFreq >= subj{i}.fixedGamma_floor  & avgFreq <= subj{i}.fixedGamma_ceiling)/10));
     subj{i}.mean_falpha1Power = nanmean(10.^(avgPSD(avgFreq >= subj{i}.fixedAlpha1_floor & avgFreq <= subj{i}.fixedAlpha1_ceiling)/10));
     subj{i}.mean_falpha2Power = nanmean(10.^(avgPSD(avgFreq >= subj{i}.fixedAlpha2_floor & avgFreq <= subj{i}.fixedAlpha2_ceiling)/10));
     subj{i}.mean_falpha3Power = nanmean(10.^(avgPSD(avgFreq >= subj{i}.fixedAlpha3_floor & avgFreq <= subj{i}.fixedAlpha3_ceiling)/10));
@@ -136,11 +136,16 @@ for i = 1:numel(files)
     % channel that makes up C3, O1. 
     % 2. Calculate frequency bands for C3, O1
     % 3. Compute AlphaTheta ratio for both C3 and O1
-    
-    avgC3Signal = nanmean(Signal(:, C3trodes))';
-    avgO1Signal = nanmean(Signal(:, O1trodes))';
+    avgC3Signal = mean(Signal(:,C3trodes(1)),2);
+    for k = 2:numel(C3trodes)
+        avgC3Signal = (mean(Signal(:,C3trodes(k)),2) + avgC3Signal) / 2;
+    end
+    avgO1Signal = mean(Signal(:,O1trodes(1)),2);
+    for l = 2:numel(O1trodes)
+        avgO1Signal = (mean(Signal(:,O1trodes(l)),2) + avgO1Signal) / 2;
+    end
     C3PeakFit = nbt_doPeakFit(avgC3Signal, SignalInfo);
-    O1PeakFit = nbt_doPeakFit(avg01Signal, SignalInfo);
+    O1PeakFit = nbt_doPeakFit(avgO1Signal, SignalInfo);
     % Calculate frequency bands
     subj{i}.O1meanIAF = nanmean(subj{i}.O1IAFs);
     subj{i}.O1meanTF  = nanmean(subj{i}.O1TFs);
