@@ -143,7 +143,7 @@ for i = 1:numel(files)
     avgO1Signal = mean(Signal(:,O1trodes(1)),2);
     for l = 2:numel(O1trodes)
         avgO1Signal = (mean(Signal(:,O1trodes(l)),2) + avgO1Signal) / 2;
-    end
+    end 
     C3PeakFit = nbt_doPeakFit(avgC3Signal, SignalInfo);
     O1PeakFit = nbt_doPeakFit(avgO1Signal, SignalInfo);
     % Calculate frequency bands
@@ -197,8 +197,8 @@ for i = 1:numel(files)
     subj{i}.O1Alpha3_ceiling = subj{i}.O1meanIAF + 2;
     subj{i}.O1Alpha_ceiling  = subj{i}.O1meanIAF + 2;
     
-    [avgPSDC3, avgFreqC3] = spectopo(avgC3Signal, 0, 512, 'plot','off');
-    [avgPSDO1, avgFreqO1] = spectopo(avgO1Signal, 0, 512, 'plot','off');
+    [avgPSDC3, avgFreqC3] = spectopo(avgC3Signal', 0, 512, 'plot','off');
+    [avgPSDO1, avgFreqO1] = spectopo(avgO1Signal', 0, 512, 'plot','off');
     
     subj{i}.C3_DeltaPower  = nanmean(10.^(avgPSDC3(avgFreqC3 >= subj{i}.C3Delta_floor  & avgFreqC3 <= subj{i}.C3Delta_ceiling)/10));
     subj{i}.C3_thetaPower  = nanmean(10.^(avgPSDC3(avgFreqC3 >= subj{i}.C3Theta_floor  & avgFreqC3 <= subj{i}.C3Theta_ceiling)/10));
