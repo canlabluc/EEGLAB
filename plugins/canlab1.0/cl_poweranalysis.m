@@ -18,21 +18,35 @@ cd ~/nbt
 installNBT;
 files = dir(fullfile(strcat(importpath, '/*S.mat')));
 subj{size(files, 1)} = [];
-
+C3trodes = [11 15 17 20];
+O1trodes = [25 26 27];
 for i = 1:numel(files)
     [Signal, SignalInfo, path] = nbt_load_file(strcat(importpath, '/', files(i).name));
     subj{i}.SubjectID = files(i).name;
-    subj{i}.IAFs      = [];
+    % Preallocate memory for IAFs / TFs, as well as the IAFs / TFs for the C3 O1
+    % electrodes, which we'll be using for the Alpha/Theta ratio.
+    subj{i}.IAFs   = zeros(1, size(Signal,2));
+    subj{i}.TFs    = zeros(1, size(Signal,2));
+    subj{i}.O1IAFs = zeros(1, size(O1trodes,2));
+    subj{i}.O1TFs  = zeros(1, size(O1trodes,2));
+    subj{i}.C3IAFs = zeros(1, size(C3trodes,2));
+    subj{i}.C3TFs  = zeros(1, size(C3trodes,2));
     for j = 1:size(Signal,2)
         % Calculate IAF, TF for each channel, and then find the average for
         % the IAF and TF, excluding the NaN values. Check: Does computing
         % IAF, TF for each channel produce the same value as taking the
         % grand average and computing the IAF / TF?
         tempPeakObj  = nbt_doPeakFit(Signal(:,j), SignalInfo);
-        subj{i}.IAFs = [subj{i}.IAFs; tempPeakObj.IAF];
-        subj{i}.TFs  = [subj{i}.TFs; tempPeakObj.TF];
-        % TODO: Save C3, O1 electrode IAFs and TFs
-    end
+        subj{i}.IAFs(j) = tempPeakObj.IAF;
+        subj{i}.TFs(j)  = tempPeakObj.TF;
+        if any(C3trodes == j)
+            subj{i}.O1IAFs(j) = tempPeakObj.IAF;
+            subj{i}.O1TFs(j)  = tempPeakObj.TF;
+        elseif any(O1trodes == j);
+            subj{i}.C3IAFs(j) = tempPeakObj.IAF;
+            subj{i}.C3TFs(j)  = tempPeakObj.TF;
+        end
+    end    
     subj{i}.meanIAF = nanmean(subj{i}.IAFs);
     subj{i}.meanTF  = nanmean(subj{i}.TFs);
     % Take the grand average for the subject, then find PSD of grand average
