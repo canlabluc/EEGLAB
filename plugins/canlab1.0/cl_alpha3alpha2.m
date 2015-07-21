@@ -65,7 +65,8 @@ for i = 1:numel(files)
     subj{i}.fixedBeta_floor     = 13;
     subj{i}.fixedBeta_ceiling   = 30;
     subj{i}.fixedGamma_floor    = 30;
-    subj{i}.fixedGamma_ceiling  = 45; % Gamma ceiling is 45 Hz for fixed and IAF-based bands
+    subj{i}.fixedGamma_ceiling  = 45; 
+    % Gamma ceiling is 45 Hz for fixed and IAF-based bands
     
     % ---- FREQUENCY BANDS DERIVED FROM IAF & TF ---- %
     % Check to see that we don't get negative frequencies. If they do

@@ -131,6 +131,23 @@ for i = 1:numel(files)
     subj{i}.O1gammaFloor    = 30;
     subj{i}.O1gammaCeiling  = 45;
     
+    subj{i}.deltaFloor_fixed    = 1;     
+    subj{i}.deltaCeiling_fixed  = 4;     
+    subj{i}.thetaFloor_fixed    = 4; 
+    subj{i}.thetaCeiling_fixed  = 8; 
+    subj{i}.alphaFloor_fixed    = 8; 
+    subj{i}.alpha1Floor_fixed   = 8; 
+    subj{i}.alpha1Ceiling_fixed = 9.25; 
+    subj{i}.alpha2Floor_fixed   = 9.25; 
+    subj{i}.alpha2Ceiling_fixed = 10.5; 
+    subj{i}.alpha3Floor_fixed   = 10.5; 
+    subj{i}.alpha3Ceiling_fixed = 13; 
+    subj{i}.alphaCeiling_fixed  = 13;     
+    subj{i}.betaFloor_fixed     = 13;
+    subj{i}.betaCeiling_fixed   = 30;
+    subj{i}.gammaFloor_fixed    = 30;
+    subj{i}.gammaCeiling_fixed  = 45;
+
     % Run spectopo to acquire power spectrum, and calculate absoltue power
     [C3avgPSD, C3avgFreq] = spectopo(subj{i}.avgC3Signal', 0, 512, 'plot', 'off');
     [O1avgPSD, O1avgFreq] = spectopo(subj{i}.avgO1Signal', 0, 512, 'plot', 'off');
@@ -152,9 +169,30 @@ for i = 1:numel(files)
     subj{i}.O1alpha3Power     = nanmean(10.^(O1avgPSD(O1avgFreq >= subj{i}.O1alpha3Floor & O1avgFreq <= subj{i}.O1alpha3Ceiling)/10));
     subj{i}.O1fixedbetaPower  = nanmean(10.^(O1avgPSD(O1avgFreq >= subj{i}.O1betaFloor   & O1avgFreq <= subj{i}.O1betaCeiling)/10));
     subj{i}.O1fixedgammaPower = nanmean(10.^(O1avgPSD(O1avgFreq >= subj{i}.O1gammaFloor  & O1avgFreq <= subj{i}.O1gammaCeiling)/10));
+    % --- Power using fixed frequency bands --- %
+    subj{i}.O1deltaPower_fixed      = nanmean(10.^(O1avgPSD(O1avgFreq >= subj{i}.deltaFloor_fixed  & O1avgFreq <= subj{i}.deltaCeiling_fixed)/10));
+    subj{i}.O1thetaPower_fixed      = nanmean(10.^(O1avgPSD(O1avgFreq >= subj{i}.thetaFloor_fixed  & O1avgFreq <= subj{i}.thetaCeiling_fixed)/10));
+    subj{i}.O1alphaPower_fixed      = nanmean(10.^(O1avgPSD(O1avgFreq >= subj{i}.alphaFloor_fixed  & O1avgFreq <= subj{i}.alphaCeiling_fixed)/10));
+    subj{i}.O1alpha1Power_fixed     = nanmean(10.^(O1avgPSD(O1avgFreq >= subj{i}.alpha1Floor_fixed & O1avgFreq <= subj{i}.alphaCeiling_fixed)/10));
+    subj{i}.O1alpha2Power_fixed     = nanmean(10.^(O1avgPSD(O1avgFreq >= subj{i}.alpha2Floor_fixed & O1avgFreq <= subj{i}.alpha2Ceiling_fixed)/10));
+    subj{i}.O1alpha3Power_fixed     = nanmean(10.^(O1avgPSD(O1avgFreq >= subj{i}.alpha3Floor_fixed & O1avgFreq <= subj{i}.alpha3Ceiling_fixed)/10));
+    subj{i}.O1fixedbetaPower_fixed  = nanmean(10.^(O1avgPSD(O1avgFreq >= subj{i}.betaFloor_fixed  & O1avgFreq <= subj{i}.betaCeiling_fixed)/10));
+    subj{i}.O1fixedgammaPower_fixed = nanmean(10.^(O1avgPSD(O1avgFreq >= subj{i}.gammaFloor_fixed  & O1avgFreq <= subj{i}.gammaCeiling_fixed)/10));
+    subj{i}.C3deltaPower_fixed      = nanmean(10.^(C3avgPSD(C3avgFreq >= subj{i}.deltaFloor_fixed  & C3avgFreq <= subj{i}.deltaCeiling_fixed)/10));
+    subj{i}.C3thetaPower_fixed      = nanmean(10.^(C3avgPSD(C3avgFreq >= subj{i}.thetaFloor_fixed  & C3avgFreq <= subj{i}.thetaCeiling_fixed)/10));
+    subj{i}.C3alphaPower_fixed      = nanmean(10.^(C3avgPSD(C3avgFreq >= subj{i}.alphaFloor_fixed  & C3avgFreq <= subj{i}.alphaCeiling_fixed)/10));
+    subj{i}.C3alpha1Power_fixed     = nanmean(10.^(C3avgPSD(C3avgFreq >= subj{i}.alpha1Floor_fixed & C3avgFreq <= subj{i}.alphaCeiling_fixed)/10));
+    subj{i}.C3alpha2Power_fixed     = nanmean(10.^(C3avgPSD(C3avgFreq >= subj{i}.alpha2Floor_fixed & C3avgFreq <= subj{i}.alpha2Ceiling_fixed)/10));
+    subj{i}.C3alpha3Power_fixed     = nanmean(10.^(C3avgPSD(C3avgFreq >= subj{i}.alpha3Floor_fixed & C3avgFreq <= subj{i}.alpha3Ceiling_fixed)/10));
+    subj{i}.C3fixedbetaPower_fixed  = nanmean(10.^(C3avgPSD(C3avgFreq >= subj{i}.betaFloor_fixed  & C3avgFreq <= subj{i}.betaCeiling_fixed)/10));
+    subj{i}.C3fixedgammaPower_fixed = nanmean(10.^(C3avgPSD(C3avgFreq >= subj{i}.gammaFloor_fixed  & C3avgFreq <= subj{i}.gammaCeiling_fixed)/10));
+    
     % Calculate ratios
     subj{i}.C3AlphaThetaRatio = subj{i}.C3alphaPower / subj{i}.C3thetaPower; 
     subj{i}.O1AlphaThetaRatio = subj{i}.O1alphaPower / subj{i}.O1thetaPower;
+    subj{i}.C3AlphaThetaRatio_fixed = subj{i}.C3alphaPower_fixed / subj{i}.C3alphaPower_fixed;
+    subj{i}.O1AlphaThetaRatio_fixed = subj{i}.O1alphaPower_fixed / subj{i}.O1alphaPower_fixed;
+
     subj{i}.C3UpperLowAlphaRatio = subj{i}.C3alpha3Power / subj{i}.C3alpha3Power;
     subj{i}.O1UpperLowAlphaRatio = subj{i}.O1alpha3Power / subj{i}.O1alpha3Power;
 end
