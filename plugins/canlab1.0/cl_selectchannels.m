@@ -1,7 +1,6 @@
 % This script allows the user to select channels to average, exclude, or
 % include in a number of datasets prior to running analysis. 
-% Clinical Electrodes:
-% 
+
 importpath = uigetdir('~', 'Select directory to import from');
 exportpath = uigetdir('~', 'Select directory to export to');
 if importpath == 0
@@ -19,7 +18,7 @@ extClinicalCh = [9 19 20 28 32 39 47 48 57 63 64 65 66];
 for id = 1:numel(files)
     EEG = pop_loadset(files(id).name, importpath);
     % Now we remove selected data channels from all of the datasets.
-    EEG = pop_select(EEG, 'nochannel', extClinicalCh);
+    EEG = pop_select(EEG, 'nochannel', stdClinicalCh);
     pop_saveset(EEG, 'filename', files(id).name(1:end-4), 'filepath',...
         exportpath, 'savemode', 'onefile');
 end

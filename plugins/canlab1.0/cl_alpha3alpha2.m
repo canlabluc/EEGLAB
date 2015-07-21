@@ -18,30 +18,39 @@ cd ~/nbt
 installNBT;
 files = dir(fullfile(strcat(importpath, '/*S.mat')));
 subj{size(files, 1)} = [];
-C3trodes = [11 15 17 20];
-O1trodes = [25 26 27];
 for i = 1:numel(files)
     [Signal, SignalInfo, path] = nbt_load_file(strcat(importpath, '/', files(i).name));
     subj{i}.SubjectID = files(i).name;
     % Preallocate memory for IAFs / TFs
     subj{i}.IAFs   = zeros(1, size(Signal,2));
     subj{i}.TFs    = zeros(1, size(Signal,2));
+    subj{i}.rejectedIAFs = 0;
+    subj{i}.rejectedTFs  = 0;
     for j = 1:size(Signal,2)
         % Calculate IAF, TF for each channel, and then find the average for
-        % the IAF and TF, excluding the NaN values.
+        % the IAF and TF, excluding the NaN values and incredibly low ones
         tempPeakObj = nbt_doPeakFit(Signal(:,j), SignalInfo);
-        subj{i}.IAFs(j) = tempPeakObj.IAF;
-        subj{i}.TFs(j)  = tempPeakObj.TF;
-    end 
-    subj{i}.meanIAF   = nanmean(subj{i}.IAFs);
-    subj{i}.meanTF    = nanmean(subj{i}.TFs);
+        if isnan(tempPeakObj.IAF) || tempPeakObj.IAF < 1
+            subj{i}.rejectedIAFs = subj{i}.rejectedIAFs + 1;
+        else
+            subj{i}.IAFs(j) = tempPeakObj.IAF;
+        end
+        if isnan(tempPeakObj.TF) || tempPeakObj.TF < 2
+            subj{i}.rejectedTFs = subj{i}.rejectedTFs + 1;
+        else
+            subj{i}.TFs(j) = tempPeakObj.TF;
+        end
+    end
+    % Calculate overall IAF and TF for this subject
+    subj{i}.meanIAF = nanmean(subj{i}.IAFs);
+    subj{i}.meanTF  = nanmean(subj{i}.TFs);
     % Take the grand average for the subject, then find PSD of grand average
     [avgPSD, avgFreq] = spectopo(nanmean(Signal'), 0, 512, 'plot', 'off');
     subj{i}.avgPSD  = avgPSD;
     subj{i}.avgFreq = avgFreq;
     
     % ---- FIXED FREQUENCY BANDS ---- %
-    subj{i}.fixedDelta_floor    = 0;
+    subj{i}.fixedDelta_floor    = 1;
     subj{i}.fixedDelta_ceiling  = 4;
     subj{i}.fixedTheta_floor    = 4;
     subj{i}.fixedTheta_ceiling  = 8;
@@ -59,13 +68,10 @@ for i = 1:numel(files)
     subj{i}.fixedGamma_ceiling  = 45; % Gamma ceiling is 45 Hz for fixed and IAF-based bands
     
     % ---- FREQUENCY BANDS DERIVED FROM IAF & TF ---- %
-    subj{i}.peakFit = nbt_doPeakFit(Signal, SignalInfo);
-    subj{i}.meanIAF = nanmean(subj{i}.peakFit.IAF);
-    subj{i}.meanTF  = nanmean(subj{i}.peakFit.TF);
     % Check to see that we don't get negative frequencies. If they do
     % occur, assign traditional values.
     if subj{i}.meanTF - 4 < 0
-        subj{i}.Delta_floor = 0;
+        subj{i}.Delta_floor = 1;
     else
         subj{i}.Delta_floor = subj{i}.meanTF - 4;
     end

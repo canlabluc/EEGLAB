@@ -61,10 +61,7 @@ for i = 1:numel(files)
     else
         subj{i}.C3IAF = C3PeakFit.IAF;
     end
-    if isnan(C3PeakFit.TF)
-        subj{i}.C3TF = 4.5;
-        C3PeakFit.TF = 4.5;
-    elseif C3PeakFit.TF < 1
+    if isnan(C3PeakFit.TF) || C3PeakFit.TF < 1
         subj{i}.C3TF = 4.5;
         C3PeakFit.TF = 4.5;
     else
@@ -76,10 +73,7 @@ for i = 1:numel(files)
     else
         subj{i}.O1IAF = O1PeakFit.IAF;
     end
-    if isnan(O1PeakFit.TF)
-        subj{i}.O1TF = 4.5;
-        O1PeakFit.TF = 4.5;
-    elseif O1PeakFit.TF < 1
+    if isnan(O1PeakFit.TF) || O1PeakFit.TF < 1
         subj{i}.O1TF = 4.5;
         O1PeakFit.TF = 4.5;
     else

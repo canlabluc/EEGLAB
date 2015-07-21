@@ -17,7 +17,7 @@ for id = 1:numel(files)
     [EEG] = pop_eegfiltnew(EEG, 0.5);
     [EEG] = pop_eegfiltnew(EEG, [], 45);
     % Save file to specified directory with "filt" suffix
-    name = strcat(files(id).name(1:end-4), 'filt');
+    name = files(id).name(1:end-4);
     pop_saveset(EEG, 'filename', name, 'filepath',...
         exportpath, 'savemode', 'onefile');
 end  
