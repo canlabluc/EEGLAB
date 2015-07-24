@@ -1,12 +1,12 @@
 % This script utilizes nbt_doPeakFit and EEGLAB's spectopo() function to calculate
 % absolute power across both calculated power bands and fixed ones. Note
-% that since spectopo() returns the Power Spectrum Density in
+% that since spectopo() returns the Power Spectrum Density in units of
 % 10*log10(uV^2), we need to apply a few transformations to acquire uV^2,
 % or absolute power. 
 
 importpath = uigetdir('~', 'Select folder to import from (contains .mat files)');
 if importpath == 0
-    error('Error: Please specify the folder that contains the .set files.');
+    error('Error: Please specify the folder that contains the .mat files.');
 end
 fprintf('Import path: %s\n', importpath);
 exportpath = uigetdir('~', 'Select folder to export resulting struct to');
@@ -96,7 +96,7 @@ for i = 1:numel(files)
     %subj{i}.Beta1_floor    = 
     %subj{i}.Beta1_ceiling  = 
     %subj{i}.Beta2_floor    = 
-    %ubj{i}.Beta2_ceiling  = 
+    %ubj{i}.Beta2_ceiling   = 
     %subj{i}.Gamma_floor    = 
     % -- Gamma ceiling already set
     
