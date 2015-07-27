@@ -17,112 +17,145 @@ fprintf('Export path: %s\n', exportpath);
 cd ~/nbt
 installNBT;
 files = dir(fullfile(strcat(importpath, '/*S.mat')));
-subj{size(files, 1)} = [];
+subj(size(files, 1)) = struct('SubjectID', '',...
+                              'IAF', 0.0,...
+                              'TF', 0.0,...
+                              'ratio_Alpha32', 0.0,...
+                              'ratio_Alpha32Fixed', 0.0,...
+                              'ratio_AlphaTheta', 0.0,...
+                              'ratio_AlphaThetaFixed', 0.0,...
+                              'deltaFloor', 0.0,...
+                              'deltaCeiling', 0.0,...
+                              'thetaFloor', 0.0,...
+                              'thetaCeiling', 0.0,...
+                              'alphaFloor', 0.0,...
+                              'alpha1Floor', 0.0,...
+                              'alpha1Ceiling', 0.0,...
+                              'alpha2Floor', 0.0,...
+                              'alpha2Ceiling', 0.0,...
+                              'alpha3Floor', 0.0,...
+                              'alpha3Ceiling', 0.0,...
+                              'betaFloor', 0.0,...
+                              'betaCeiling', 0.0,...
+                              'gammaFloor', 0.0,...
+                              'gammaCeiling', 0.0,...
+                              'deltaFloor_fixed',    0.5,...
+                              'deltaCeiling_fixed',  4,...
+                              'thetaFloor_fixed',    4,...
+                              'thetaCeiling_fixed',  8,...
+                              'alphaFloor_fixed',    8,...
+                              'alpha1Floor_fixed',   8,...
+                              'alpha1Ceiling_fixed', 9.25,...
+                              'alpha2Floor_fixed',   9.25,...
+                              'alpha2Ceiling_fixed', 10.5,...
+                              'alpha3Floor_fixed',   10.5,...
+                              'alpha3Ceiling_fixed', 13,...
+                              'betaFloor_fixed',     13,...
+                              'betaCeiling_fixed',   30,...
+                              'gammaFloor_fixed',    30,...
+                              'gammaCeiling_fixed',  45),...
+                              'deltaPower', 0.0,...
+                              'thetaPower', 0.0,...
+                              'alphaPower', 0.0,...
+                              'alpha1Power', 0.0,...
+                              'alpha2Power', 0.0,...
+                              'alpha3Power', 0.0,...
+                              'betaPower', 0.0,...
+                              'gammaPower', 0.0,...
+                              'deltaPower_fixed', 0.0,...
+                              'thetaPower_fixed', 0.0,...
+                              'alphaPower_fixed', 0.0,...
+                              'alpha1Power_fixed', 0.0,...
+                              'alpha2Power_fixed', 0.0,...
+                              'alpha3Power_fixed', 0.0,...
+                              'betaPower_fixed', 0.0,...
+                              'gammaPower_fixed', 0.0));
 for i = 1:numel(files)
     [Signal, SignalInfo, path] = nbt_load_file(strcat(importpath, '/', files(i).name));
-    subj{i}.SubjectID = files(i).name;
+    subj(i).SubjectID = files(i).name;
     % Preallocate memory for IAFs / TFs
-    subj{i}.IAFs   = zeros(1, size(Signal,2));
-    subj{i}.TFs    = zeros(1, size(Signal,2));
-    subj{i}.rejectedIAFs = 0;
-    subj{i}.rejectedTFs  = 0;
+    subj(i).IAFs   = zeros(1, size(Signal,2));
+    subj(i).TFs    = zeros(1, size(Signal,2));
+    subj(i).rejectedIAFs = 0;
+    subj(i).rejectedTFs  = 0;
     for j = 1:size(Signal,2)
         % Calculate IAF, TF for each channel, and then find the average for
         % the IAF and TF, excluding the NaN values and incredibly low ones
         tempPeakObj = nbt_doPeakFit(Signal(:,j), SignalInfo);
         if isnan(tempPeakObj.IAF) || tempPeakObj.IAF < 1
-            subj{i}.rejectedIAFs = subj{i}.rejectedIAFs + 1;
+            subj(i).rejectedIAFs = subj(i).rejectedIAFs + 1;
         else
-            subj{i}.IAFs(j) = tempPeakObj.IAF;
+            subj(i).IAFs(j) = tempPeakObj.IAF;
         end
         if isnan(tempPeakObj.TF) || tempPeakObj.TF < 2
-            subj{i}.rejectedTFs = subj{i}.rejectedTFs + 1;
+            subj(i).rejectedTFs = subj(i).rejectedTFs + 1;
         else
-            subj{i}.TFs(j) = tempPeakObj.TF;
+            subj(i).TFs(j) = tempPeakObj.TF;
         end
     end
     % Calculate overall IAF and TF for this subject
-    subj{i}.meanIAF = nanmean(subj{i}.IAFs);
-    subj{i}.meanTF  = nanmean(subj{i}.TFs);
+    subj(i).meanIAF = nanmean(subj(i).IAFs);
+    subj(i).meanTF  = nanmean(subj(i).TFs);
     % Take the grand average for the subject, then find PSD of grand average
     [avgPSD, avgFreq] = spectopo(nanmean(Signal'), 0, 512, 'plot', 'off');
-    subj{i}.avgPSD  = avgPSD;
-    subj{i}.avgFreq = avgFreq;
-    
-    % ---- FIXED FREQUENCY BANDS ---- %
-    subj{i}.fixedDelta_floor    = 1;
-    subj{i}.fixedDelta_ceiling  = 4;
-    subj{i}.fixedTheta_floor    = 4;
-    subj{i}.fixedTheta_ceiling  = 8;
-    subj{i}.fixedAlpha_floor    = 8;
-    subj{i}.fixedAlpha1_floor   = 8;
-    subj{i}.fixedAlpha1_ceiling = 9.25;
-    subj{i}.fixedAlpha2_floor   = 9.25;
-    subj{i}.fixedAlpha2_ceiling = 10.5;
-    subj{i}.fixedAlpha3_floor   = 10.5;
-    subj{i}.fixedAlpha3_ceiling = 13;
-    subj{i}.fixedAlpha_ceiling  = 13;
-    subj{i}.fixedBeta_floor     = 13;
-    subj{i}.fixedBeta_ceiling   = 30;
-    subj{i}.fixedGamma_floor    = 30;
-    subj{i}.fixedGamma_ceiling  = 45; 
-    % Gamma ceiling is 45 Hz for fixed and IAF-based bands
+    subj(i).avgPSD  = avgPSD;
+    subj(i).avgFreq = avgFreq;
     
     % ---- FREQUENCY BANDS DERIVED FROM IAF & TF ---- %
     % Check to see that we don't get negative frequencies. If they do
     % occur, assign traditional values.
-    if subj{i}.meanTF - 4 < 0
-        subj{i}.Delta_floor = 1;
+    if subj(i).meanTF - 4 < 0
+        subj(i).idx.deltaFloor = 1;
     else
-        subj{i}.Delta_floor = subj{i}.meanTF - 4;
+        subj(i).idx.deltaFloor = subj(i).meanTF - 4;
     end
-    if subj{i}.meanTF - 2 < 0
-        subj{i}.Delta_ceiling = 4;
-        subj{i}.Theta_floor   = 4;
+    if subj(i).meanTF - 2 < 0
+        subj(i).idx.deltaCeiling = 4;
+        subj(i).idx.thetaFloor   = 4;
     else
-        subj{i}.Delta_ceiling = subj{i}.meanTF - 2;
-        subj{i}.Theta_floor   = subj{i}.meanTF - 2;
+        subj(i).idx.deltaCeiling = subj(i).meanTF - 2;
+        subj(i).idx.thetaFloor   = subj(i).meanTF - 2;
     end
-    subj{i}.Theta_ceiling  = subj{i}.meanTF;
-    subj{i}.Alpha_floor    = subj{i}.meanTF;
-    subj{i}.Alpha1_floor   = subj{i}.meanTF;
-    subj{i}.Alpha1_ceiling = (subj{i}.meanIAF + subj{i}.meanTF) / 2;
-    subj{i}.Alpha2_floor   = (subj{i}.meanIAF + subj{i}.meanTF) / 2;
-    subj{i}.Alpha2_ceiling = subj{i}.meanIAF;
-    subj{i}.Alpha3_floor   = subj{i}.meanIAF;
-    subj{i}.Alpha3_ceiling = subj{i}.meanIAF + 2;
-    subj{i}.Alpha_ceiling  = subj{i}.meanIAF + 2;
+    subj(i).thetaCeiling  = subj(i).meanTF;
+    subj(i).alphaFloor    = subj(i).meanTF;
+    subj(i).alpha1Floor   = subj(i).meanTF;
+    subj(i).alpha1Ceiling = (subj(i).meanIAF + subj(i).meanTF) / 2;
+    subj(i).alpha2Floor   = (subj(i).meanIAF + subj(i).meanTF) / 2;
+    subj(i).alpha2Ceiling = subj(i).meanIAF;
+    subj(i).alpha3Floor   = subj(i).meanIAF;
+    subj(i).alpha3Ceiling = subj(i).meanIAF + 2;
+    subj(i).alphaCeiling  = subj(i).meanIAF + 2;
     % TODO: Find peaks and troughs, use to calculate these
-    %subj{i}.Beta1_floor    = 
-    %subj{i}.Beta1_ceiling  = 
-    %subj{i}.Beta2_floor    = 
-    %ubj{i}.Beta2_ceiling   = 
-    %subj{i}.Gamma_floor    = 
+    %subj(i).Beta1_floor    = 
+    %subj(i).Beta1_ceiling  = 
+    %subj(i).Beta2_floor    = 
+    %ubj(i).Beta2_ceiling   = 
+    %subj(i).gammaFloor    = 
     % -- Gamma ceiling already set
     
-    % Calculate absolute power (amplitude^2) across fixed (traditional) frequency bands
-    subj{i}.fixedDeltaPower  = nanmean(10.^(avgPSD(avgFreq >= subj{i}.fixedDelta_floor  & avgFreq <= subj{i}.fixedDelta_ceiling)/10));
-    subj{i}.fixedThetaPower  = nanmean(10.^(avgPSD(avgFreq >= subj{i}.fixedTheta_floor  & avgFreq <= subj{i}.fixedTheta_ceiling)/10));
-    subj{i}.fixedAlphaPower  = nanmean(10.^(avgPSD(avgFreq >= subj{i}.fixedAlpha_floor  & avgFreq <= subj{i}.fixedAlpha_ceiling)/10));
-    subj{i}.fixedBetaPower   = nanmean(10.^(avgPSD(avgFreq >= subj{i}.fixedBeta_floor   & avgFreq <= subj{i}.fixedBeta_ceiling)/10));
-    subj{i}.fixedGammaPower  = nanmean(10.^(avgPSD(avgFreq >= subj{i}.fixedGamma_floor  & avgFreq <= subj{i}.fixedGamma_ceiling)/10));
-    subj{i}.fixedAlpha1Power = nanmean(10.^(avgPSD(avgFreq >= subj{i}.fixedAlpha1_floor & avgFreq <= subj{i}.fixedAlpha1_ceiling)/10));
-    subj{i}.fixedAlpha2Power = nanmean(10.^(avgPSD(avgFreq >= subj{i}.fixedAlpha2_floor & avgFreq <= subj{i}.fixedAlpha2_ceiling)/10));
-    subj{i}.fixedAlpha3Power = nanmean(10.^(avgPSD(avgFreq >= subj{i}.fixedAlpha3_floor & avgFreq <= subj{i}.fixedAlpha3_ceiling)/10));
+    % Calculate the absolute power (amplitude^2) across fixed (traditional) frequency bands
+    subj(i).deltaPower_fixed  = calculatePower(avgPSD, avgFreq, subj(i).deltaFloor_fixed,  subj(i).deltaCeiling_fixed);
+    subj(i).thetaPower_fixed  = calculatePower(avgPSD, avgFreq, subj(i).thetaFloor_fixed,  subj(i).thetaCeiling_fixed);
+    subj(i).alphaPower_fixed  = calculatePower(avgPSD, avgFreq, subj(i).alphaFloor_fixed,  subj(i).alphaCeiling_fixed);
+    subj(i).alpha1Power_fixed = calculatePower(avgPSD, avgFreq, subj(i).betaFloor_fixed,   subj(i).betaCeiling_fixed);
+    subj(i).alpha2Power_fixed = calculatePower(avgPSD, avgFreq, subj(i).gammaFloor_fixed,  subj(i).gammaCeiling_fixed);
+    subj(i).alpha3Power_fixed = calculatePower(avgPSD, avgFreq, subj(i).alpha1Floor_fixed, subj(i).alpha1Ceiling_fixed);
+    subj(i).betaPower_fixed   = calculatePower(avgPSD, avgFreq, subj(i).alpha2Floor_fixed, subj(i).alpha2Ceiling_fixed);
+    subj(i).gammaPower_fixed  = calculatePower(avgPSD, avgFreq, subj(i).alpha3Floor_fixed, subj(i).alpha3Ceiling_fixed);
 
     % Compute absolute power across derived bands
-    subj{i}.DeltaPower  = nanmean(10.^(avgPSD(avgFreq >= subj{i}.Delta_floor  & avgFreq <= subj{i}.Delta_ceiling)/10));
-    subj{i}.ThetaPower  = nanmean(10.^(avgPSD(avgFreq >= subj{i}.Theta_floor  & avgFreq <= subj{i}.Theta_ceiling)/10));
-    subj{i}.AlphaPower  = nanmean(10.^(avgPSD(avgFreq >= subj{i}.Alpha_floor  & avgFreq <= subj{i}.Alpha_ceiling)/10));
-    subj{i}.Alpha1Power = nanmean(10.^(avgPSD(avgFreq >= subj{i}.meanTF       & avgFreq <= subj{i}.Alpha2_floor)/10));
-    subj{i}.Alpha2Power = nanmean(10.^(avgPSD(avgFreq >= subj{i}.Alpha2_floor & avgFreq <= subj{i}.meanIAF)/10));
-    subj{i}.Alpha3Power = nanmean(10.^(avgPSD(avgFreq >= subj{i}.meanIAF      & avgFreq <= subj{i}.Alpha3_ceiling)/10));
+    subj(i).deltaPower  = calculatePower(avgPSD, avgFreq, subj(i).deltaFloor,  subj(i).deltaCeiling);
+    subj(i).thetaPower  = calculatePower(avgPSD, avgFreq, subj(i).thetaFloor,  subj(i).thetaCeiling);
+    subj(i).alphaPower  = calculatePower(avgPSD, avgFreq, subj(i).alphaFloor,  subj(i).alphaCeiling);
+    subj(i).alpha1Power = calculatePower(avgPSD, avgFreq, subj(i).meanTF,      subj(i).alpha2Floor);
+    subj(i).alpha2Power = calculatePower(avgPSD, avgFreq, subj(i).alpha2Floor, subj(i).meanIAF);
+    subj(i).alpha3Power = calculatePower(avgPSD, avgFreq, subj(i).meanIAF,     subj(i).alpha3Ceiling);
     
     % Compute ratios using both fixed and calculated bands
-    subj{i}.ratio_Alpha32Fixed    = subj{i}.fixedAlpha3Power / subj{i}.fixedAlpha2Power;
-    subj{i}.ratio_AlphaThetaFixed = subj{i}.fixedAlphaPower / subj{i}.fixedThetaPower;
-    subj{i}.ratio_Alpha32    = subj{i}.Alpha3Power / subj{i}.Alpha2Power;
-    subj{i}.ratio_AlphaTheta = subj{i}.AlphaPower / subj{i}.ThetaPower;
+    subj(i).ratio_Alpha32Fixed    = subj(i).alpha3Power_fixed / subj(i).alpha2Power_fixed;
+    subj(i).ratio_AlphaThetaFixed = subj(i).alphaPower_fixed / subj(i).thetaPower_fixed;
+    subj(i).ratio_Alpha32    = subj(i).alpha3Power / subj(i).alpha2Power;
+    subj(i).ratio_AlphaTheta = subj(i).alphaPower / subj(i).thetaPower;
 end
 structFile = strcat(exportpath, '/', date, '-results', '.mat');
 save(structFile, 'subj');
