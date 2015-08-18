@@ -4,8 +4,9 @@ function eegplugin_canlab( fig, try_strings, catch_strings )
 %
 %   cl_importcnt: Imports directory full of .cnt files into EEGLAB.
 %   cl_bandpassfilter: Applies 0.5 - 45 Hz filter to a directory of datasets.
+%   cl_rereference: Allows re-referencing to common average or specific electrode
 %   cl_nbtfilenames: Converts directory of datasets to NBT nomenclature
-%   cl_selectchannels: Allows user to exclude specific channels
+%   cl_excludechannels: Allows user to exclude specific channels
 %   cl_alpha3alpha2: Calculates the IAF, TF, alpha3/alpha2 ratio for grand average
 %   cl_alphatheta: Calculates alpha/theta ratio for C3 and O1 electrodes
 %
@@ -17,9 +18,9 @@ if ~exist('cl_importcnt.m', 'file')
     p = p(1:strfind(p,'cl_importcnt.m')-1);
     addpath( p );
 end;
-if ~exist('cl_changesamplefreq.m', 'file')
-    p = which('cl_changesamplefreq.m');
-    p = p(1:strfind(p,'cl_changesamplefreq.m')-1);
+if ~exist('cl_resample.m', 'file')
+    p = which('cl_resample.m');
+    p = p(1:strfind(p,'cl_resample.m')-1);
     addpath( p );
 end;
 if ~exist('cl_bandpassfilter.m', 'file')
@@ -67,7 +68,7 @@ menuAlphaTheta      = findobj(fig, 'tag', 'tools');
 % menu callbacks (so that they show up in EEGLAB's interface)
 % --------------
 uimenu( menuImportCNT,       'label', 'CANLAB: Import multiple .cnt files', 'callback', 'cl_importcnt');
-uimenu( menuResample,        'label', 'CANLAB: Batched resampling', 'callback', 'cl_importcnt');
+uimenu( menuResample,        'label', 'CANLAB: Batched resampling', 'callback', 'cl_resample');
 uimenu( menuBandpass,        'label', 'CANLAB: Batched bandpass filter', 'callback', 'cl_bandpassfilter');
 uimenu( menuExcludeChannels, 'label', 'CANLAB: Batched exclusion of channels', 'callback', 'cl_excludechannels');
 uimenu( menuRereference,     'label', 'CANLAB: Batched re-referencing of channels', 'callback', 'cl_rereference')

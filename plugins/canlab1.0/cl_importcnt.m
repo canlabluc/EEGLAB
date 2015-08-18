@@ -6,10 +6,10 @@
 %
 % Inputs:
 % importpath: A string which specifies the directory containing the .cnt files
-% that are to be imported
+%             that are to be imported
 % 
 % exportpath: A string which specifies the directory containing the .set files
-% that are to be saved for further analysis
+%             that are to be saved for further analysis
 % 
 % Notes: 
 % cl_importcnt utilizes EEGLAB's pop_loadcnt() function to import files

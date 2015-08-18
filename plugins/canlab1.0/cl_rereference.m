@@ -6,10 +6,10 @@
 %
 % Inputs:
 % importpath: A string which specifies the directory containing the EEG datasets
-% to be re-referenced
+%             to be re-referenced
 % 
 % exportpath: A string which specifies the directory containing the .set files
-% that are to be saved for further analysis
+%             that are to be saved for further analysis
 % 
 % reference: Specifies reference channel or common average
 %   Options:
