@@ -1,22 +1,41 @@
-% -------------------------------------- % 
-% --- Alpha / Theta Ratio for C3, O1 --- %
-% -------------------------------------- %
-% This script calculates the alpha/theta and alpha3/alpha2 ratios and derived 
+% Calculates the alpha/theta and alpha3/alpha2 ratios and individualized
 % frequency bands for the C3, O1 area electrodes. 
+%
+% Usage:
+%   >>> subj = cl_alphatheta();
+%   >>> subj = cl_alphatheta(importpath, exportpath);
+% 
+% Inputs:
+% importpath: A string which specifies the directory containing the .cnt files
+%             that are to be imported
+% 
+% exportpath: A string which specifies the directory containing the .set files
+%             that are to be saved for further analysis
+% 
+% Outputs:
+% subj: An array of structures, one for each subject that is processed. The
+%       structure contains all of the results of the analysis
+
+function subj = cl_alphatheta(importpath, exportpath)
 
 C3trodes = [11 15 17 20];
 O1trodes = [25 26 27];
 
-importpath = uigetdir('~', 'Select folder to import from (contains .mat files)');
-if importpath == 0
-    error('Error: Please specify the folder that contains the .set files.');
+if (~exist('importpath', 'var'))
+    importpath = uigetdir('~', 'Select folder to import .cnt files from');
+    if importpath == 0
+        error('Error: Please specify the folder that contains the .cnt files.');
+    end
+    fprintf('Import path: %s\n', importpath);
 end
-fprintf('Import path: %s\n', importpath);
-exportpath = uigetdir('~', 'Select folder to export resulting struct to');
-if exportpath == 0
-    error('Error: Please specify the folder to export results files to.');
+if (~exist('exportpath', 'var'))
+    exportpath   = uigetdir('~', 'Select folder to export .set files to');
+    if exportpath == 0
+        error('Error: Please specify the folder to export the .set files to.');
+    end
+    fprintf('Export path: %s\n', exportpath);
 end
-fprintf('Export path: %s\n', exportpath);
+
 cd ~/nbt
 installNBT;
 files = dir(fullfile(strcat(importpath, '/*S.mat')));
@@ -126,7 +145,7 @@ for i = 1:numel(files)
 % ---------------- %
 % Begin processing %
 % ---------------- %
-
+tic;
 for i = 1:numel(files)
     [Signal, SignalInfo, path] = nbt_load_file(strcat(importpath, '/', files(i).name));
     subj(i).SubjectID = files(i).name(9:11);
@@ -289,7 +308,7 @@ for i = 1:numel(files)
     subj(i).C3betaPower_fixed   = calculatePower(C3avgPSD, C3avgFreq, subj(i).C3betaFloor,   subj(i).C3betaCeiling);
     subj(i).C3gammaPower_fixed  = calculatePower(C3avgPSD, C3avgFreq, subj(i).C3gammaFloor,  subj(i).C3gammaCeiling);
     
-    % Calculate ratios
+    % --- Calculate ratios --- %
     subj(i).C3AlphaThetaRatio = subj(i).C3alphaPower / subj(i).C3thetaPower; 
     subj(i).O1AlphaThetaRatio = subj(i).O1alphaPower / subj(i).O1thetaPower;
     subj(i).C3AlphaThetaRatio_fixed = subj(i).C3alphaPower_fixed / subj(i).C3alphaPower_fixed;
@@ -298,4 +317,7 @@ for i = 1:numel(files)
     subj(i).C3UpperLowAlphaRatio = subj(i).C3alpha3Power / subj(i).C3alpha3Power;
     subj(i).O1UpperLowAlphaRatio = subj(i).O1alpha3Power / subj(i).O1alpha3Power;
 end
-
+toc;
+structFile = strcat(exportpath, '/', date, '-results', '.mat');
+save(structFile, 'subj');
+cl_processalphatheta;

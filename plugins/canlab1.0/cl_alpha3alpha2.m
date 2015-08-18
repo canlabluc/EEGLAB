@@ -1,33 +1,59 @@
-% This script utilizes nbt_doPeakFit and EEGLAB's spectopo() function to calculate
-% absolute power across both individualized power bands and fixed ones. Note
-% that since spectopo() returns the Power Spectrum Density in units of
+% Calculates absolute power across both individualized frequency bands and
+% fixed ones. Utilizes nbt_doPeakFit() and EEGLAB's spectopo() function.
+%
+% Usage:
+%   >>> subj = cl_alpha3alpha2();
+%   >>> subj = cl_alpha3alpha2(importpath, exportpath);
+% 
+% Inputs:
+% importpath: A string which specifies the directory containing the .cnt files
+%             that are to be imported
+% 
+% exportpath: A string which specifies the directory containing the .set files
+%             that are to be saved for further analysis
+% 
+% Outputs:
+% subj: An array of structures, one for each subject that is processed. The
+%       structure contains all of the results of the analysis
+% 
+% Notes:
+% Note that since spectopo() returns the Power Spectrum Density in units of
 % 10*log10(uV^2), we need to apply a few transformations to acquire uV^2,
 % or absolute power. 
 
-importpath = uigetdir('~', 'Select folder to import from (contains .mat files)');
-if importpath == 0
-    error('Error: Please specify the folder that contains the .mat files.');
+function subj = cl_alpha3alpha2(importpath, exportpath)
+
+if (~exist('importpath', 'var'))
+    importpath = uigetdir('~', 'Select folder to import .cnt files from');
+    if importpath == 0
+        error('Error: Please specify the folder that contains the .cnt files.');
+    end
+    fprintf('Import path: %s\n', importpath);
 end
-fprintf('Import path: %s\n', importpath);
-exportpath = uigetdir('~', 'Select folder to export resulting struct to');
-if exportpath == 0
-    error('Error: Please specify the folder to export results files to.');
+if (~exist('exportpath', 'var'))
+    exportpath   = uigetdir('~', 'Select folder to export .set files to');
+    if exportpath == 0
+        error('Error: Please specify the folder to export the .set files to.');
+    end
+    fprintf('Export path: %s\n', exportpath);
 end
-fprintf('Export path: %s\n', exportpath);
+
 cd ~/nbt
 installNBT;
 files = dir(fullfile(strcat(importpath, '/*S.mat')));
 % Preallocation
 subj(size(files, 1)) = struct();
-subj(:) = struct('SubjectID', '',...
+[Signal, SignalInfo, path] = nbt_load_file(strcat(importpath, '/', files(1).name));
+subj(:) = struct('SubjectID', 'SXXX',...
                  'meanIAF', 0.0,... % These are found by first finding the IAF and
-                 'meanTF', 0.0,...  % TF of every channel, and then averaging
+                 'meanTF', 0.0,...  % TF of every channel, and then averaging them
                  'ratio_Alpha32', 0.0,...
                  'ratio_Alpha32Fixed', 0.0,...
                  'ratio_AlphaTheta', 0.0,...
                  'ratio_AlphaThetaFixed', 0.0,...
                  'IAFs', zeros(1, size(Signal,2)),...
                  'TFs',  zeros(1, size(Signal,2)),...
+                 'Signal', zeros(1, size(Signal,1)),...
                  'rejectedIAFs', 0,...
                  'rejectedTFs', 0,...
                  'deltaFloor', 0.0,...
@@ -56,10 +82,11 @@ subj(:) = struct('SubjectID', '',...
                  'alpha2Ceiling_fixed', 10.5,...
                  'alpha3Floor_fixed',   10.5,...
                  'alpha3Ceiling_fixed', 13,...
+                 'alphaCeiling_fixed',  13,...
                  'betaFloor_fixed',     13,...
                  'betaCeiling_fixed',   30,...
                  'gammaFloor_fixed',    30,...
-                 'gammaCeiling_fixed',  45),...
+                 'gammaCeiling_fixed',  45,...
                  'deltaPower', 0.0,...
                  'thetaPower', 0.0,...
                  'alphaPower', 0.0,...
@@ -75,12 +102,14 @@ subj(:) = struct('SubjectID', '',...
                  'alpha2Power_fixed', 0.0,...
                  'alpha3Power_fixed', 0.0,...
                  'betaPower_fixed', 0.0,...
-                 'gammaPower_fixed', 0.0));
+                 'gammaPower_fixed', 0.0);
 
 % ---------------- %
 % Begin processing %
 % ---------------- %
+tic;
 for i = 1:numel(files)
+    disp('asdfasfdf');
     [Signal, SignalInfo, path] = nbt_load_file(strcat(importpath, '/', files(i).name));
     subj(i).SubjectID = files(i).name;
     for j = 1:size(Signal,2)
@@ -103,6 +132,7 @@ for i = 1:numel(files)
     subj(i).meanTF  = nanmean(subj(i).TFs);
     % Take the grand average for the subject, then find PSD of grand average
     [avgPSD, avgFreq] = spectopo(nanmean(Signal'), 0, 512, 'plot', 'off');
+    subj(i).Signal  = mean(Signal');
     subj(i).avgPSD  = avgPSD;
     subj(i).avgFreq = avgFreq;
     
@@ -169,6 +199,7 @@ for i = 1:numel(files)
     subj(i).ratio_Alpha32Fixed    = subj(i).alpha3Power_fixed / subj(i).alpha2Power_fixed;
     subj(i).ratio_AlphaThetaFixed = subj(i).alphaPower_fixed / subj(i).thetaPower_fixed;
 end
+toc;
 structFile = strcat(exportpath, '/', date, '-results', '.mat');
 save(structFile, 'subj');
-
+cl_processalpha3alpha2;
