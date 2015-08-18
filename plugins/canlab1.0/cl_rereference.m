@@ -1,8 +1,8 @@
-% Applies a bandpass filter
+% Re-references EEG datasets to the common average
 %
 % Usage:
-%   >>> cl_bandpassfilter();
-%   >>> cl_bandpassfilter(importpath, exportpath, lowerFreq, higherFreq);
+%   >>> cl_rereference();
+%   >>> cl_rereference(importpath, exportpath, reference);
 %
 % Inputs:
 % importpath: A string which specifies the directory containing the EEG datasets
@@ -11,11 +11,11 @@
 % exportpath: A string which specifies the directory containing the .set files
 % that are to be saved for further analysis
 % 
-% lowerCutOff: High-pass frequency. Typically we set this to 0.5 Hz
-%
-% higherCutOff: Low-pass frequency. Typically we set this to 45 Hz
+% reference: Specifies reference channel or common average
+%   Options:
+%       - 'CAR': Re-references EEG data to common average
 
-function cl_bandpassfilter(importpath, exportpath, lowerFreq, higherFreq)
+function cl_rereference(importpath, exportpath, reference)
 
 if (~exist('importpath', 'var'))
     importpath = uigetdir('~', 'Select folder to import .set files from');
@@ -36,10 +36,11 @@ end
 files = dir(fullfile(strcat(importpath, '/*.set')));
 for id = 1:numel(files)
     EEG = pop_loadset(files(id).name, importpath);
-    % Apply filtering: 0.5 - 45 Hz
-    [EEG] = pop_eegfiltnew(EEG, 0.5);
-    [EEG] = pop_eegfiltnew(EEG, [], 45);
-    % Save file to specified directory with "filt" suffix
+    % Compute and re-reference EEG dataset to grand average
+    if reference == 'CAR'
+        EEG = pop_reref(EEG, []);
+    end        
+    % Save file to specified directory
     name = files(id).name(1:end-4);
     pop_saveset(EEG, 'filename', name, 'filepath',...
         exportpath, 'savemode', 'onefile');

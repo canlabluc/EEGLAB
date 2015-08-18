@@ -17,9 +17,19 @@ if ~exist('cl_importcnt.m', 'file')
     p = p(1:strfind(p,'cl_importcnt.m')-1);
     addpath( p );
 end;
+if ~exist('cl_changesamplefreq.m', 'file')
+    p = which('cl_changesamplefreq.m');
+    p = p(1:strfind(p,'cl_changesamplefreq.m')-1);
+    addpath( p );
+end;
 if ~exist('cl_bandpassfilter.m', 'file')
     p = which('cl_bandpassfilter.m');
     p = p(1:strfind(p,'cl_bandpassfilter.m')-1);
+    addpath( p );
+end;
+if ~exist('cl_rereference.m', 'file')
+    p = which('cl_rereference.m');
+    p = p(1:strfind(p,'cl_rereference.m')-1);
     addpath( p );
 end;
 if ~exist('cl_nbtfilenames', 'file')
@@ -27,9 +37,9 @@ if ~exist('cl_nbtfilenames', 'file')
     p = p(1:strfind(p,'cl_nbtfilenames.m')-1);
     addpath( p );
 end;
-if ~exist('cl_selectchannels', 'file')
-    p = which('cl_selectchannels.m');
-    p = p(1:strfind(p,'cl_selectchannels.m')-1);
+if ~exist('cl_excludechannels', 'file')
+    p = which('cl_excludechannels.m');
+    p = p(1:strfind(p,'cl_excludechannels.m')-1);
     addpath( p );
 end;
 if ~exist('cl_alpha3alpha2', 'file')
@@ -45,19 +55,23 @@ end;
 
 % find import data menu
 % ---------------------
-menuImportCNT      = findobj(fig, 'tag', 'import data');
-menuBandpass       = findobj(fig, 'tag', 'tools');
-menuNBTFilenames   = findobj(fig, 'tag', 'tools');
-menuSelectChannels = findobj(fig, 'tag', 'tools');
-menuAlpha3Alpha2   = findobj(fig, 'tag', 'tools');
-menuAlphaTheta     = findobj(fig, 'tag', 'tools');
+menuImportCNT       = findobj(fig, 'tag', 'import data');
+menuResample        = findobj(fig, 'tag', 'tools');
+menuBandpass        = findobj(fig, 'tag', 'tools');
+menuRereference     = findobj(fig, 'tag', 'tools');
+menuNBTFilenames    = findobj(fig, 'tag', 'tools');
+menuExcludeChannels = findobj(fig, 'tag', 'tools');
+menuAlpha3Alpha2    = findobj(fig, 'tag', 'tools');
+menuAlphaTheta      = findobj(fig, 'tag', 'tools');
 
 % menu callbacks (so that they show up in EEGLAB's interface)
 % --------------
-uimenu( menuImportCNT,     'label', 'CANLAB: Import multiple .cnt files', 'callback', 'cl_importcnt');
-uimenu( menuBandpass,      'label', 'CANLAB: Batched bandpass filter', 'callback', 'cl_bandpassfilter');
-uimenu( menuSelectChannels,'label', 'CANLAB: Batched exclusion of channels', 'callback', 'cl_selectchannels');
-uimenu( menuNBTFilenames,  'label', 'CANLAB: Convert files to NBT nomenclature', 'callback', 'cl_nbtfilenames');
-uimenu( menuAlpha3Alpha2,  'label', 'CANLAB: Compute Alpha3/Alpha2 ratio', 'callback', 'cl_alpha3alpha2');
-uimenu( menuAlphaTheta,    'label', 'CANLAB: Compute Alpha/Theta ratio', 'callback', 'cl_alphatheta');
+uimenu( menuImportCNT,       'label', 'CANLAB: Import multiple .cnt files', 'callback', 'cl_importcnt');
+uimenu( menuResample,        'label', 'CANLAB: Batched resampling', 'callback', 'cl_importcnt');
+uimenu( menuBandpass,        'label', 'CANLAB: Batched bandpass filter', 'callback', 'cl_bandpassfilter');
+uimenu( menuExcludeChannels, 'label', 'CANLAB: Batched exclusion of channels', 'callback', 'cl_excludechannels');
+uimenu( menuRereference,     'label', 'CANLAB: Batched re-referencing of channels', 'callback', 'cl_rereference')
+uimenu( menuNBTFilenames,    'label', 'CANLAB: Convert files to NBT nomenclature', 'callback', 'cl_nbtfilenames');
+uimenu( menuAlpha3Alpha2,    'label', 'CANLAB: Compute Alpha3/Alpha2 ratio', 'callback', 'cl_alpha3alpha2');
+uimenu( menuAlphaTheta,      'label', 'CANLAB: Compute Alpha/Theta ratio', 'callback', 'cl_alphatheta');
 end

@@ -1,7 +1,22 @@
+% Change EEGLAB .set datasets from CANLab to NBT naming system
+% 
+% Usage:
+%   >>> cl_nbtfilenames(); % GUI
+%   >>> cl_nbtfilenames(importpath, exportpath);
+% 
+% Inputs:
+% importpath: A string which specifies the directory containing the .cnt files
+% that are to be imported
+% 
+% exportpath: A string which specifies the directory containing the .set files
+% that are to be saved for further analysis
+%
 % This script converts a folder full of EEGLAB .set files into the naming
 % system that NBT uses:
-%   <ProjectID>.<SubjectID>.<Date of recording>.<Condition>
-%   e.g., NBT.S0099.20090212.EOR2.
+%   <ProjectID>.<SubjectID>.<Date of recording>.<Condition>.mat
+%   e.g., NBT.S0099.20090212.EOR2.mat
+%
+% Note that these end up being .mat files, as this is how NBT deals with data.
 
 importpath = uigetdir('~', 'Select folder to import from');
 exportpath = uigetdir('~', 'Select folder to export to');
