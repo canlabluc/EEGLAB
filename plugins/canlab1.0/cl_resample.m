@@ -40,7 +40,7 @@ for id = 1:numel(files)
     % Import set files into EEG object
     EEG = pop_loadset(files(id).name, importpath);
     % Change sampling frequency
-    [EEG] = pop_resample(EEG, freq);
+    [EEG] = pop_resample(EEG, sampleFreq);
     % Save to export folder
     pop_saveset(EEG, 'filename', files(id).name(1:end-4), 'filepath',...
         exportpath, 'savemode', 'onefile');
