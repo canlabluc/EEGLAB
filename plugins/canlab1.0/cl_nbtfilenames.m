@@ -2,7 +2,7 @@
 % end up being .mat files, since this is how NBt deals with data.
 % 
 % Usage:
-%   >>> cl_nbtfilenames(); % GUI
+%   >>> cl_nbtfilenames(); % GUI option
 %   >>> cl_nbtfilenames(importpath, exportpath);
 % 
 % Inputs:

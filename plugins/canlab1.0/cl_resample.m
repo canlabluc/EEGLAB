@@ -1,7 +1,7 @@
 % Changes sample frequency for a batch of .set files
 %
 % Usage:
-%   >>> subj = cl_alphatheta();
+%   >>> subj = cl_alphatheta();    % GUI option 
 %   >>> subj = cl_alphatheta(importpath, exportpath);
 % 
 % Inputs:

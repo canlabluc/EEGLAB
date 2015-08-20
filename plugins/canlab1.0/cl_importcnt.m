@@ -1,41 +1,21 @@
-% Converts .cnt files to EEGLAB-usable .set files
-%
-% Usage:
-%   >>> cl_importcnt(); % Brings up menu which allows user specify directories
-%   >>> cl_importcnt(importpath, exportpath);
-%
-% Inputs:
-% importpath: A string which specifies the directory containing the .cnt files
-%             that are to be imported
-% 
-% exportpath: A string which specifies the directory containing the .set files
-%             that are to be saved for further analysis
-% 
-% Notes: 
-% cl_importcnt utilizes EEGLAB's pop_loadcnt() function to import files
-% from a directory specified by the user. Each dataset is added to the ALLEEG 
-% object, and saved as a .set file to another directory also specified by the
-% user.
-%
+% This script utilizes the pop_loadcnt() function to import cnt files from
+% a directory specified by the user. Each dataset is added to the ALLEEG
+% object, and saved as a .set file to another directory also specified by
+% the user.
 % Default parameters passed to pop_loadcnt():
-%   'blockread', 1 
+%   'blockread', 1
+% All .cnt files are added to the ALLEEG struct array. 
 
-function cl_importcnt(importpath, exportpath)
-
-if (~exist('importpath', 'var'))
-    importpath = uigetdir('~', 'Select folder to import .cnt files from');
-    if importpath == 0
-        error('Error: Please specify the folder that contains the .cnt files.');
-    end
-    fprintf('Import path: %s\n', importpath);
+importpath = uigetdir('C:\Users\canlab\Documents\MATLAB\', 'Select folder to import from');
+if importpath == 0
+    error('Error: Please specify the folder that contains the .cnt files.');
 end
-if (~exist('exportpath', 'var'))
-    exportpath   = uigetdir('~', 'Select folder to export .set files to');
-    if exportpath == 0
-        error('Error: Please specify the folder to export the .set files to.');
-    end
-    fprintf('Export path: %s\n', exportpath);
+fprintf('Import path: %s\n', importpath);
+exportpath   = uigetdir('C:\Users\canlab\Documents\MATLAB\', 'Select folder to export to');
+if exportpath == 0
+    error('Error: Please specify the folder to export the .set files to.');
 end
+fprintf('Export path: %s\n', exportpath);
 
 filelist = dir(fullfile(strcat(importpath, '/*.cnt')));
 for i = 1:numel(filelist)

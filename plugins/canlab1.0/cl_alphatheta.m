@@ -2,7 +2,7 @@
 % frequency bands for the C3, O1 area electrodes. 
 %
 % Usage:
-%   >>> subj = cl_alphatheta();
+%   >>> subj = cl_alphatheta();     % GUI option
 %   >>> subj = cl_alphatheta(importpath, exportpath);
 % 
 % Inputs:
@@ -270,7 +270,7 @@ for i = 1:numel(files)
     [C3avgPSD, C3avgFreq] = spectopo(subj(i).avgC3Signal', 0, 512, 'plot', 'off');
     [O1avgPSD, O1avgFreq] = spectopo(subj(i).avgO1Signal', 0, 512, 'plot', 'off');
 
-    % --- C3 Power --- %
+    % C3 Power
     subj(i).C3deltaPower  = calculatePower(C3avgPSD, C3avgFreq, subj(i).C3deltaFloor,  subj(i).C3deltaCeiling);
     subj(i).C3thetaPower  = calculatePower(C3avgPSD, C3avgFreq, subj(i).C3thetaFloor,  subj(i).C3thetaCeiling);
     subj(i).C3alphaPower  = calculatePower(C3avgPSD, C3avgFreq, subj(i).C3alphaFloor,  subj(i).C3alphaCeiling);
@@ -280,7 +280,7 @@ for i = 1:numel(files)
     subj(i).C3betaPower   = calculatePower(C3avgPSD, C3avgFreq, subj(i).C3betaFloor,   subj(i).C3betaCeiling);
     subj(i).C3gammaPower  = calculatePower(C3avgPSD, C3avgFreq, subj(i).C3gammaFloor,  subj(i).C3gammaCeiling);
     
-    % --- O1 Power --- %
+    % O1 Power
     subj(i).O1deltaPower  = calculatePower(O1avgPSD, O1avgFreq, subj(i).O1deltaFloor,  subj(i).O1deltaCeiling);
     subj(i).O1thetaPower  = calculatePower(O1avgPSD, O1avgFreq, subj(i).O1thetaFloor,  subj(i).O1thetaCeiling);
     subj(i).O1alphaPower  = calculatePower(O1avgPSD, O1avgFreq, subj(i).O1alphaFloor,  subj(i).O1alphaCeiling);
@@ -290,7 +290,7 @@ for i = 1:numel(files)
     subj(i).O1betaPower   = calculatePower(O1avgPSD, O1avgFreq, subj(i).O1betaFloor,   subj(i).O1betaCeiling);
     subj(i).O1gammaPower  = calculatePower(O1avgPSD, O1avgFreq, subj(i).O1gammaFloor,  subj(i).O1gammaCeiling);
     
-    % --- Power using fixed frequency bands --- %
+    % Power using fixed frequency bands
     subj(i).O1deltaPower_fixed  = calculatePower(C3avgPSD, C3avgFreq, subj(i).C3deltaFloor,  subj(i).C3deltaCeiling);
     subj(i).O1thetaPower_fixed  = calculatePower(C3avgPSD, C3avgFreq, subj(i).C3thetaFloor,  subj(i).C3thetaCeiling);
     subj(i).O1alphaPower_fixed  = calculatePower(C3avgPSD, C3avgFreq, subj(i).C3alphaFloor,  subj(i).C3alphaCeiling);
@@ -308,7 +308,7 @@ for i = 1:numel(files)
     subj(i).C3betaPower_fixed   = calculatePower(C3avgPSD, C3avgFreq, subj(i).C3betaFloor,   subj(i).C3betaCeiling);
     subj(i).C3gammaPower_fixed  = calculatePower(C3avgPSD, C3avgFreq, subj(i).C3gammaFloor,  subj(i).C3gammaCeiling);
     
-    % --- Calculate ratios --- %
+    % Calculate ratios
     subj(i).C3AlphaThetaRatio = subj(i).C3alphaPower / subj(i).C3thetaPower; 
     subj(i).O1AlphaThetaRatio = subj(i).O1alphaPower / subj(i).O1thetaPower;
     subj(i).C3AlphaThetaRatio_fixed = subj(i).C3alphaPower_fixed / subj(i).C3alphaPower_fixed;

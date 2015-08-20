@@ -1,7 +1,7 @@
 % Re-references EEG datasets to the common average
 %
 % Usage:
-%   >>> cl_rereference();
+%   >>> cl_rereference();   % GUI option
 %   >>> cl_rereference(importpath, exportpath, reference);
 %
 % Inputs:

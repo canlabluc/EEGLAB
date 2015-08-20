@@ -2,7 +2,7 @@
 % fixed ones. Utilizes nbt_doPeakFit() and EEGLAB's spectopo() function.
 %
 % Usage:
-%   >>> subj = cl_alpha3alpha2();
+%   >>> subj = cl_alpha3alpha2();   % GUI option
 %   >>> subj = cl_alpha3alpha2(importpath, exportpath);
 % 
 % Inputs:
@@ -19,7 +19,15 @@
 % Notes:
 % Note that since spectopo() returns the Power Spectrum Density in units of
 % 10*log10(uV^2), we need to apply a few transformations to acquire uV^2,
-% or absolute power. 
+% or absolute power.
+% 
+% Algorithm:
+% Calculate the IAF and TF for each channel, rejecting any TFs or IAFs that do
+% not fall within a specified range. Then, take the power spectrum of the 
+% grand average of all the channels, using the average IAF and TF to calculate
+% individualized frequency bands. Once these are found, compute the 
+% alpha3/alpha2 power ratio using both individualized and fixed (traditional)
+% frequency bands. 
 
 function subj = cl_alpha3alpha2(importpath, exportpath)
 
@@ -41,7 +49,7 @@ end
 cd ~/nbt
 installNBT;
 files = dir(fullfile(strcat(importpath, '/*S.mat')));
-% Preallocation
+% Preallocation of memory
 subj(size(files, 1)) = struct();
 [Signal, SignalInfo, path] = nbt_load_file(strcat(importpath, '/', files(1).name));
 subj(:) = struct('SubjectID', 'SXXX',...
@@ -54,8 +62,10 @@ subj(:) = struct('SubjectID', 'SXXX',...
                  'IAFs', zeros(1, size(Signal,2)),...
                  'TFs',  zeros(1, size(Signal,2)),...
                  'Signal', zeros(1, size(Signal,1)),...
-                 'rejectedIAFs', 0,...
-                 'rejectedTFs', 0,...
+                 'rejectedIAFs', [],...
+                 'rejectedTFs',  [],...
+                 'visuallyInspectedIAFs', [],...
+                 'visuallyInspectedTFs',  [],...
                  'deltaFloor', 0.0,...
                  'deltaCeiling', 0.0,...
                  'thetaFloor', 0.0,...
@@ -109,29 +119,52 @@ subj(:) = struct('SubjectID', 'SXXX',...
 % ---------------- %
 tic;
 for i = 1:numel(files)
-    disp('asdfasfdf');
     [Signal, SignalInfo, path] = nbt_load_file(strcat(importpath, '/', files(i).name));
     subj(i).SubjectID = files(i).name;
     for j = 1:size(Signal,2)
+        fprintf('Channel %d: ===== ', j);
         % Calculate IAF, TF for each channel, and then find the average for
-        % the IAF and TF, excluding the NaN values and incredibly low ones
-        tempPeakObj = nbt_doPeakFit(Signal(:,j), SignalInfo);
-        if isnan(tempPeakObj.IAF) || tempPeakObj.IAF < 1
-            subj(i).rejectedIAFs = subj(i).rejectedIAFs + 1;
+        % the IAF and TF, excluding NaN values and those that fall completely
+        % outside of expected range.
+        channelPeakObj = nbt_doPeakFit(Signal(:,j), SignalInfo);
+        if isnan(channelPeakObj.IAF) || channelPeakObj.IAF < 7 || channelPeakObj.IAF > 13
+            fprintf('IAF: %d -- CONFIRM BY CLICKING\n', channelPeakObj.IAF);
+            subj(i).visuallyInspectedIAFs = [subj(i).visuallyInspectedIAFs; j];
+            spectopo(Signal(:,j)', 0, SignalInfo.converted_sample_frequency, 'freqrange', [0 16]);
+            [x,y] = ginput(1);
+            subj(i).IAFs(j) = x;
+            % visualIAF = input('Calculated IAF is outside expected range.\nVisually inspect and input IAF, or press enter to reject: ');
+            % if isempty(visualIAF)
+            %     subj(i).rejectedIAFs = [subj(i).rejectedIAFs; j];
+            % else
+            %     subj(i).IAFs(j) = visualIAF;
+            % end
+            close(2);
         else
-            subj(i).IAFs(j) = tempPeakObj.IAF;
+            subj(i).IAFs(j) = channelPeakObj.IAF;
         end
-        if isnan(tempPeakObj.TF) || tempPeakObj.TF < 2
-            subj(i).rejectedTFs = subj(i).rejectedTFs + 1;
+        if isnan(channelPeakObj.TF) || channelPeakObj.TF < 4 || channelPeakObj.TF > 7
+            fprintf('TF: %d -- CONFIRM BY CLICKING\n', channelPeakObj.TF);
+            subj(i).visuallyInspectedTFs = [subj(i).visuallyInspectedTFs; j];
+            spectopo(Signal(:,j)', 0, SignalInfo.converted_sample_frequency, 'freqrange', [0 16]);
+            [x,y] = ginput(1);
+            subj(i).TFs(j) = x;
+            % visualTF = input('Calculated TF is outside expected range.\nVisually inspect and input TF, or press enter to reject: ');
+            % if isempty(visualTF)
+            %     subj(i).rejectedTFs = [subj(i).rejectedTFs; j];
+            % else
+            %     subj(i).TFs(j) = visualTF;
+            % end
+            close(2);
         else
-            subj(i).TFs(j) = tempPeakObj.TF;
+            subj(i).TFs(j) = channelPeakObj.TF;
         end
-    end
+    end        
     % Calculate overall IAF and TF for this subject
     subj(i).meanIAF = nanmean(subj(i).IAFs);
     subj(i).meanTF  = nanmean(subj(i).TFs);
     % Take the grand average for the subject, then find PSD of grand average
-    [avgPSD, avgFreq] = spectopo(nanmean(Signal'), 0, 512, 'plot', 'off');
+    [avgPSD, avgFreq] = spectopo(mean(Signal'), 0, 512, 'plot', 'off');
     subj(i).Signal  = mean(Signal');
     subj(i).avgPSD  = avgPSD;
     subj(i).avgFreq = avgFreq;
@@ -139,21 +172,10 @@ for i = 1:numel(files)
     % ----------------------------------------------------- %
     % Use IAF and TF to find individualized frequency bands %
     % ----------------------------------------------------- %
-    % Check to see that we don't get negative frequencies. If 
-    % they do occur, assign traditional values.
 
-    if subj(i).meanTF - 4 < 0
-        subj(i).deltaFloor = 0.5;
-    else
-        subj(i).deltaFloor = subj(i).meanTF - 4;
-    end
-    if subj(i).meanTF - 2 < 0
-        subj(i).deltaCeiling = 4;
-        subj(i).thetaFloor   = 4;
-    else
-        subj(i).deltaCeiling = subj(i).meanTF - 2;
-        subj(i).thetaFloor   = subj(i).meanTF - 2;
-    end
+    subj(i).deltaFloor    = subj(i).meanTF - 4;
+    subj(i).deltaCeiling  = subj(i).meanTF - 2;
+    subj(i).thetaFloor    = subj(i).meanTF - 2;
     subj(i).thetaCeiling  = subj(i).meanTF;
     subj(i).alphaFloor    = subj(i).meanTF;
     subj(i).alpha1Floor   = subj(i).meanTF;
@@ -169,7 +191,12 @@ for i = 1:numel(files)
     %subj(i).Beta2_floor   = 
     %subj(i).Beta2_ceiling = 
     %subj(i).gammaFloor    = 
-    % -- Gamma ceiling already set
+    % Gamma ceiling already set
+    % In case TF is below 4.5, readjust deltaFloor so we don't get incorrect
+    % power calculations 
+    if subj(i).deltaFloor < 0.5
+        subj(i).deltaFloor = 0.5;
+    end
 
     % --------------- %
     % Calculate Power %
@@ -202,4 +229,4 @@ end
 toc;
 structFile = strcat(exportpath, '/', date, '-results', '.mat');
 save(structFile, 'subj');
-cl_processalpha3alpha2;
+cl_processalpha3alpha2(subj, exportpath);
