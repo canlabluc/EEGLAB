@@ -37,8 +37,8 @@ files = dir(fullfile(strcat(importpath, '/*.set')));
 for id = 1:numel(files)
     EEG = pop_loadset(files(id).name, importpath);
     % Apply filtering: 0.5 - 45 Hz
-    [EEG] = pop_eegfiltnew(EEG, 0.5);
-    [EEG] = pop_eegfiltnew(EEG, [], 45);
+    [EEG] = pop_eegfiltnew(EEG, lowerFreq);
+    [EEG] = pop_eegfiltnew(EEG, [], higherFreq);
     % Save file to specified directory with "filt" suffix
     name = files(id).name(1:end-4);
     pop_saveset(EEG, 'filename', name, 'filepath',...

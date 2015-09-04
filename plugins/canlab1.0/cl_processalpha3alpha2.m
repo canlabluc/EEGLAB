@@ -1,3 +1,5 @@
+function cl_processalpha3alpha2(subj)
+
 % Outputs results of cl_alpha3alpha2 to CSV file
 table{100,100} = [];
 table{1,1}  = 'SubjectID';
@@ -89,3 +91,4 @@ resultsCSV = strcat(date, '-results', '.csv');
 indexesCSV = strcat(date, '-indexes', '.csv');
 cell2csv(resultsCSV, table);
 cell2csv(indexesCSV, index);
+end

@@ -36,7 +36,10 @@ if (~exist('exportpath', 'var'))
     end
     fprintf('Export path: %s\n', exportpath);
 end
-
+cdh;
+cd EEGLAB;
+eeglab;
+global ALLEEG;
 filelist = dir(fullfile(strcat(importpath, '/*.cnt')));
 for i = 1:numel(filelist)
     EEG = pop_loadcnt(strcat(importpath, '/', filelist(i).name), 'blockread', 1);

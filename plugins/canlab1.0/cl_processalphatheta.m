@@ -1,3 +1,4 @@
+function cl_processalphatheta(subj)
 % Outputs results of cl_alphatheta to CSV file
 table{100,100} = [];
 table{1,1}  = 'SubjectID';

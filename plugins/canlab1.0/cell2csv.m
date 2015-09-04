@@ -16,7 +16,7 @@ function cell2csv(fileName, cellArray, separator, excelYear, decimal)
 % fixed the logical-bug, Kaiserslautern, 06/2008, S.Fiedler
 % added the choice of decimal separator, 11/2010, S.Fiedler
 
-%% Checking fr optional Variables
+%% Checking for optional Variables
 if ~exist('separator', 'var')
     separator = ',';
 end
