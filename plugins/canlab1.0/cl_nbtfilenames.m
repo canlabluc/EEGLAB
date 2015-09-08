@@ -45,5 +45,3 @@ for id = 1:numel(files)
         sprintf('/%s%s.%s.yyyymmdd.RS.set', study, session, subject)));
 end
 nbt_import_files(strcat(exportpath, '/'), strcat(exportpath, '/'));
-cd exportpath;
-delete *.set;

@@ -172,20 +172,19 @@ for i = 1:numel(files)
                 if guiFit == true
                     disp('IAF is too low or too high. Confirm by clicking: ');
                     spectopo(Signal(:,j)', 0, SignalInfo.converted_sample_frequency, 'freqrange', [0 16]);
-                    plot(freqs', y1);
                     [x, y] = ginput(1);
                     subj(i).IAFs(j) = x;
                     close(2);
-                else if rejectBadFits == true
+                elseif rejectBadFits == true
                     disp('IAF is too low or too high. Rejecting calculated IAF.');
-                    subj(i).IAFs(j) = [];
+                    subj(i).rejectedIAFs = [subj(i).rejectedIAFs, j];
                 else
                     disp('IAF is too low or too high. Choosing IAF = 9 Hz');
-                    subj(i).IAFs(j) = 9;
+                    subj(i).IAfs(j) = 9;
                 end
-            % Otherwise, the polynomial-fitted data gives us a reasonable IAF.
-            % Choose this as the IAF.
             else
+                % Otherwise, the polynomial-fitted data gives us a reasonable IAF.
+                % Choose this as the IAF.
                 subj(i).IAFs(j) = freqs(x);
             end
         else
@@ -211,9 +210,10 @@ for i = 1:numel(files)
                     [x, y] = ginput(1);
                     subj(i).TFs(j) = x;
                     close(2);
-                else if rejectBadFits == true
+                elseif rejectBadFits == true
                     disp('TF is too low or too high. Rejecting calculated TF');
-                    subj(i).IAFs(j) = [];
+                    % subj(i).TFs(j) = []; BAD: Shrinks matrix
+                    subj(i).rejectedTFs = [subj(i).rejectedTFs, j];
                 else
                     disp('TF is too low or too high. Choosing TF = 4.5 Hz');
                     subj(i).TFs(j) = 4.5;
@@ -228,8 +228,14 @@ for i = 1:numel(files)
         fprintf('TF:  %d\n', subj(i).TFs(j));
     end        
     % Calculate overall IAF and TF for this subject
-    subj(i).meanIAF = nanmean(subj(i).IAFs);
-    subj(i).meanTF  = nanmean(subj(i).TFs);
+    if rejectBadFits == true
+        rejectIAFs = subj(i).IAFs == 0;
+        rejectTFs  = subj(i).TFs == 0;
+        subj(i).IAFs(rejectIAFs) = [];
+        subj(i).TFs(rejectTFs) = [];
+    end
+    subj(i).meanIAF = mean(subj(i).IAFs);
+    subj(i).meanTF  = mean(subj(i).TFs);
     % Take the grand average for the subject, then find PSD of grand average
     [avgPSD, avgFreq] = spectopo(mean(Signal'), 0, 512, 'plot', 'off');
     subj(i).Signal  = mean(Signal');
