@@ -177,63 +177,12 @@ for i = 1:numel(files)
             C3PeakFit = nbt_doPeakFit(Signal(:,j), SignalInfo);
             subj(i).C3(C3Added).Signal = Signal(:,j);
             if isnan(C3PeakFit.IAF) || C3PeakFit.IAF < 7 || C3PeakFit.IAF > 13
-                fprintf('C3 -- ERROR: IAF calculated by NBT: %d\n', C3PeakFit.IAF);
-                fprintf('Fitting polynomial in order to recalculate IAF...\n');
-                [spectra, freqs] = spectopo(Signal(:,j)', 0, SignalInfo.converted_sample_frequency, 'freqrange', [0 16], 'plot', 'off');
-                ws = warning('off', 'all');
-                p = polyfit(freqs', spectra, 15);
-                warning(ws);
-                y1 = polyval(p, freqs');
-                [dummy, ind] = max(y1(find(freqs > 7):find(freqs > 13, 1)));
-                if freqs(ind) > 12.9 || freqs(ind) < 7
-                    if guiFit == true
-                        disp('IAF is too low or too high. Indicate IAF through GUI: ');
-                        spectopo(Signal(:,j)', 0, SignalInfo.converted_sample_frequency, 'freqrange', [0 16]);
-                        plot(freqs', y1);
-                        [x, y] = ginput(1);
-                        subj(i).IAFs(j) = x;
-                        close(2);
-                    else if rejectBadFits == true
-                        disp('IAF is too low or too high. Rejecting polynomial fit-calculated IAF.');
-                        subj(i).IAFs(j) = [];
-                    else
-                        disp('IAF is too low or too high. Choosing IAF = 9 Hz');
-                        subj(i).IAFs(j) = 9;
-                    end
-                % Otherwise, the polynomial-fitted data gives us a reasonable IAF.
-                % Choose this as the IAF.
-                else
-                    subj(i).IAFs(j) = freqs(x);
-                end
+                subj = cl_correctBadFits(subj, 'IAF', i, j, rejectBadFits, guiFit);
             else
                 subj(i).IAFs(j) = C3PeakFit.IAF;
             end
             if isnan(C3PeakFit.TF) || C3PeakFit.TF < x || C3PeakFit.TF > y
-                fprintf('C3 --- ERROR: TF calculated by NBT: %d\n', C3PeakFit.TF);
-                fprintf('Fitting polynomial in order to recalculate IAF...\n');
-                [spectra, freqs] = spectopo(Signal(:,j)', 0, SignalInfo.converted_sample_frequency, 'freqrange', [0 16], 'plot', 'off');
-                ws = warning('off', 'all');
-                p = polyfit(freqs', spectra, 15);
-                warning(ws);
-                y1 = polyval(p, freqs');
-                [dummy, ind] = max(y1(find(freqs > 7):find(freqs > 13, 1)));
-                if freqs(ind) > 6.9 || freqs(ind) < 3
-                    if guiFit == true
-                        disp('TF is too low or too high. Confirm by clicking: ');
-                        spectopo(Signal(:,j)', 0, SignalInfo.converted_sample_frequency, 'freqrange', [0 16]);
-                        [x, y] = ginput(1);
-                        subj(i).TFs(j) = x;
-                        close(2);
-                    else if rejectBadFits == true
-                        disp('TF is too low or too high. Rejecting calculated TF.');
-                        subj(i).TFs(j) = 4.5;
-                    else
-                        disp('TF is too low or too high. Choosing TF = 4.5 Hz');
-                        subj(i).TFs(j) = 4.5;                       
-                    end
-                else
-                    subj(i).TFs(j) = freqs(ind);
-                end
+                subj = cl_correctBadFits(subj, 'TF', i, j, rejectBadFits, guiFit);
             else
                 subj(i).TFs(j) = C3PeakFit.TF;
             end
@@ -244,63 +193,12 @@ for i = 1:numel(files)
             O1PeakFit = nbt_doPeakFit(Signal(:,j), SignalInfo);
             subj(i).O1(O1Added).Signal = Signal(:,j);
             if isnan(O1PeakFit.IAF) || O1PeakFit.IAF < 7 || O1PeakFit.IAF > 13
-                fprintf('O1 -- ERROR: IAF calculated by NBT: %d\n', O1PeakFit.IAF);
-                fprintf('Fitting polynomial in order to recalculate IAF...\n');
-                [spectra, freqs] = spectopo(Signal(:,j)', 0, SignalInfo.converted_sample_frequency, 'freqrange', [0 16], 'plot', 'off');
-                ws = warning('off', 'all');
-                p = polyfit(freqs', spectra, 15);
-                warning(ws);
-                y1 = polyval(p, freqs');
-                [dummy, ind] = max(y1(find(freqs > 7):find(freqs > 13, 1)));
-                if freqs(ind) > 12.9 || freqs(ind) < 7
-                    if guiFit == true
-                        disp('IAF is too low or too high. Indicate IAF through GUI: ');
-                        spectopo(Signal(:,j)', 0, SignalInfo.converted_sample_frequency, 'freqrange', [0 16]);
-                        plot(freqs', y1);
-                        [x, y] = ginput(1);
-                        subj(i).IAFs(j) = x;
-                        close(2);
-                    else if rejectBadFits == true
-                        disp('IAF is too low or too high. Rejecting polynomial fit-calculated IAF.');
-                        subj(i).IAFs(j) = [];
-                    else
-                        disp('IAF is too low or too high. Choosing IAF = 9 Hz');
-                        subj(i).IAFs(j) = 9;
-                    end
-                % Otherwise, the polynomial-fitted data gives us a reasonable IAF.
-                % Choose this as the IAF.
-                else
-                    subj(i).IAFs(j) = freqs(x);
-                end
+                subj = cl_correctBadFits(subj, 'IAF', i, j, rejectBadFits, guiFit);
             else
                 subj(i).IAFs(j) = O1PeakFit.IAF;
             end
             if isnan(O1PeakFit.TF) || O1PeakFit.TF < x || O1PeakFit.TF > y
-                fprintf('O1 --- ERROR: TF calculated by NBT: %d\n', O1PeakFit.TF);
-                fprintf('Fitting polynomial in order to recalculate IAF...\n');
-                [spectra, freqs] = spectopo(Signal(:,j)', 0, SignalInfo.converted_sample_frequency, 'freqrange', [0 16], 'plot', 'off');
-                ws = warning('off', 'all');
-                p = polyfit(freqs', spectra, 15);
-                warning(ws);
-                y1 = polyval(p, freqs');
-                [dummy, ind] = max(y1(find(freqs > 7):find(freqs > 13, 1)));
-                if freqs(ind) > 6.9 || freqs(ind) < 3
-                    if guiFit == true
-                        disp('TF is too low or too high. Confirm by clicking: ');
-                        spectopo(Signal(:,j)', 0, SignalInfo.converted_sample_frequency, 'freqrange', [0 16]);
-                        [x, y] = ginput(1);
-                        subj(i).TFs(j) = x;
-                        close(2);
-                    else if rejectBadFits == true
-                        disp('TF is too low or too high. Rejecting calculated TF.');
-                        subj(i).TFs(j) = 4.5;
-                    else
-                        disp('TF is too low or too high. Choosing TF = 4.5 Hz');
-                        subj(i).TFs(j) = 4.5;                       
-                    end
-                else
-                    subj(i).TFs(j) = freqs(ind);
-                end
+                subj = cl_correctBadFits(subj, 'TF', i, j, rejectBadFits, guiFit);
             else
                 subj(i).TFs(j) = O1PeakFit.TF;
             end
@@ -324,8 +222,6 @@ for i = 1:numel(files)
     for k = 2:numel(subj(i).O1)
         subj(i).avgO1Signal = (subj(i).avgO1Signal + subj(i).O1(k).Signal) / 2;     
     end
-
-
     
     % ------------------------------------------------------------------ %
     % Find IAF, TF, and use these to find individualized frequency bands %

@@ -92,8 +92,8 @@ subj(:) = struct('SubjectID', 'SXXX',...
                  'Signal', zeros(1, size(Signal,1)),...
                  'rejectedIAFs', [],...
                  'rejectedTFs',  [],...
-                 'visuallyInspectedIAFs', zeros(1, size(Signal,2)),...
-                 'visuallyInspectedTFs',  zeros(1, size(Signal,2)),...
+                 'inspectedIAFs', zeros(1, size(Signal,2)),...
+                 'inspectedTFs',  zeros(1, size(Signal,2)),...
                  'deltaFloor', 0.0,...
                  'deltaCeiling', 0.0,...
                  'thetaFloor', 0.0,...
@@ -156,71 +156,12 @@ for i = 1:numel(files)
         % outside of expected range.
         channelPeakObj = nbt_doPeakFit(Signal(:,j), SignalInfo);
         if isnan(channelPeakObj.IAF) || channelPeakObj.IAF < 7 || channelPeakObj.IAF > 13
-            fprintf('ERROR: IAF calculated by NBT: %d\n', channelPeakObj.IAF);
-            fprintf('Fitting polynomial in order to recalculate IAF...\n');
-            subj(i).visuallyInspectedIAFs(j) = j;
-            [spectra, freqs] = spectopo(Signal(:,j)', 0, SignalInfo.converted_sample_frequency, 'freqrange', [0 16], 'plot', 'off');
-            ws = warning('off', 'all');           
-            p  = polyfit(freqs', spectra, 15);
-            warning(ws);
-            y1 = polyval(p, freqs');
-            [dummy, ind] = max(y1(find(freqs > 7):find(freqs > 13, 1)));
-            % If the polynomial-fitted data is still wrong, prompt the user to
-            % either click to select the IAF, reject the fit and move on to the
-            % TF calculation, or choose an IAF of 9 Hz
-            if freqs(ind) > 12.9 || freqs(ind) < 7
-                if guiFit == true
-                    disp('IAF is too low or too high. Confirm by clicking: ');
-                    spectopo(Signal(:,j)', 0, SignalInfo.converted_sample_frequency, 'freqrange', [0 16]);
-                    [x, y] = ginput(1);
-                    subj(i).IAFs(j) = x;
-                    close(2);
-                elseif rejectBadFits == true
-                    disp('IAF is too low or too high. Rejecting calculated IAF.');
-                    subj(i).rejectedIAFs = [subj(i).rejectedIAFs, j];
-                else
-                    disp('IAF is too low or too high. Choosing IAF = 9 Hz');
-                    subj(i).IAfs(j) = 9;
-                end
-            else
-                % Otherwise, the polynomial-fitted data gives us a reasonable IAF.
-                % Choose this as the IAF.
-                subj(i).IAFs(j) = freqs(x);
-            end
+            subj = cl_correctBadFit(subj, 'IAF', i, j, false, false);
         else
             subj(i).IAFs(j) = channelPeakObj.IAF;
         end
         if isnan(channelPeakObj.TF) || channelPeakObj.TF < 4 || channelPeakObj.TF > 7
-            fprintf('ERROR: TF calculated by NBT: %d \n', channelPeakObj.TF);
-            fprintf('Fitting polynomial in order to recalculate TF...\n');
-            subj(i).visuallyInspectedTFs(j) = j;
-            [spectra, freqs] = spectopo(Signal(:,j)', 0, SignalInfo.converted_sample_frequency, 'freqrange', [0 16], 'plot', 'off');
-            % Since nbt didn't find a reasonable TF, fit a 15th order polynomial
-            % to the PSD and find minima in the 0 - 7.5 Hz range. This will be 
-            % the TF
-            ws = warning('off', 'all');
-            p  = polyfit(freqs', spectra, 15);
-            warning(ws);
-            y1 = polyval(p, freqs');
-            [dummy, ind] = min(y1(1:find(freqs > 7.5, 1)));
-            if freqs(ind) > 6.9 || freqs(ind) < 3
-                if guiFit == true
-                    disp('TF is too low or too high. Confirm by clicking: ');
-                    spectopo(Signal(:,j)', 0, SignalInfo.converted_sample_frequency, 'freqrange', [0 16]);
-                    [x, y] = ginput(1);
-                    subj(i).TFs(j) = x;
-                    close(2);
-                elseif rejectBadFits == true
-                    disp('TF is too low or too high. Rejecting calculated TF');
-                    % subj(i).TFs(j) = []; BAD: Shrinks matrix
-                    subj(i).rejectedTFs = [subj(i).rejectedTFs, j];
-                else
-                    disp('TF is too low or too high. Choosing TF = 4.5 Hz');
-                    subj(i).TFs(j) = 4.5;
-                end
-            else
-                subj(i).TFs(j) = freqs(ind);
-            end
+            subj = cl_correctBadFit(subj, 'TF', i, j, false, false);
         else
             subj(i).TFs(j) = channelPeakObj.TF;
         end
