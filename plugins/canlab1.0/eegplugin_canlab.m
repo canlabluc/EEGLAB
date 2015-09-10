@@ -43,6 +43,11 @@ if ~exist('cl_excludechannels', 'file')
     p = p(1:strfind(p,'cl_excludechannels.m')-1);
     addpath( p );
 end;
+if ~exist('cl_correctBadFits', 'file')
+    p = which('cl_correctBadFits.m');
+    p = p(1:strfind(p,'cl_correctBadFits.m')-1);
+    addpath( p );
+end;
 if ~exist('cl_alpha3alpha2', 'file')
     p = which('cl_alpha3alpha2.m');
     p = p(1:strfind(p,'cl_alpha3alpha2.m')-1);

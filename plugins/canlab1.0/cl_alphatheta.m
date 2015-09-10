@@ -209,10 +209,10 @@ for i = 1:numel(files)
     end
     % Find grand average of the aforementioned electrodes, and calculate overall
     % IAF and TF for this subject, in both the C3 and O1 electrodes
-    subj(i).C3meanTF  = nanmean(subj(i).C3(:).TFs);
-    subj(i).C3meanIAF = nanmean(subj(i).C3(:).IAFs);
-    subj(i).O1meanTF  = nanmean(subj(i).O1(:).TFs);
-    subj(i).O1meanIAF = nanmean(subj(i).O1(:).IAFs);
+    subj(i).C3meanTF  = mean(subj(i).C3(:).TFs);
+    subj(i).C3meanIAF = mean(subj(i).C3(:).IAFs);
+    subj(i).O1meanTF  = mean(subj(i).O1(:).TFs);
+    subj(i).O1meanIAF = mean(subj(i).O1(:).IAFs);
 
     subj(i).avgC3Signal = subj(i).C3(1).Signal;
     subj(i).avgO1Signal = subj(i).O1(1).Signal;

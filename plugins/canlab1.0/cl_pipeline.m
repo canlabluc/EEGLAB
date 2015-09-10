@@ -14,17 +14,16 @@ if (~exist('importpath', 'var'))
     fprintf('Import path: %s\n', importpath);
 end
 
-mkdir(strcat(importpath, '/', 'raw-set');
-mkdir(strcat(importpath, '/', 'excl-set');
-mkdir(strcat(importpath, '/', 'exclfilt-set');
-mkdir(strcat(importpath, '/', 'exclfiltCAR', lowerFreq, '-', higherFreq, '-set');
-mkdir(strcat(importpath, '/', 'exclfiltCAR', lowerFreq, '-', higherFreq, '-NBT', '-mat');
-mkdir(strcat(importpath, '/', 'results');
+%mkdir(strcat(importpath, '/', 'raw-set');
+mkdir(strcat(importpath, '/', 'excl-set'));
+mkdir(strcat(importpath, '/', 'exclfilt-set'));
+mkdir(strcat(importpath, '/', 'exclfiltCAR-set'));
+mkdir(strcat(importpath, '/', 'exclfiltCAR-NBT-mat'));
+mkdir(strcat(importpath, '/', 'results'));
 
-cl_importcnt(strcat(importpath, '/', 'raw-cnt', 'raw-set');
+%cl_importcnt(strcat(importpath, '/', 'raw-cnt', 'raw-set');
 cl_excludechannels(strcat(importpath, '/raw-set'), strcat(importpath, '/excl-set'), chExclusion);
-cl_bandpassfilter(strcat(importpath, '/excl-set'), strcat(importpath, '/exclfilt-set'));
-cl_rereference(strcat(importpath, '/exclfilt-set'), strcat(importpath, '/exclfiltCAR-0.5-45-set'), 'CAR');
-cl_nbtfilenames(strcat(importpath, '/exclfiltCAR-0.5-45-set'), strcat(importpath, '/exclfiltCAR-0.5-45-NBT-mat'));
-subj = cl_alpha3alpha2(strcat(importpath, '/exclfiltCAR-0.5-45-NBT-mat'), importpath);
-save('subj');
+cl_bandpassfilter(strcat(importpath, '/excl-set'), strcat(importpath, '/exclfilt-set'), lowerFreq, higherFreq);
+cl_rereference(strcat(importpath, '/exclfilt-set'), strcat(importpath, '/exclfiltCAR-set'), 'CAR');
+cl_nbtfilenames(strcat(importpath, '/exclfiltCAR-set'), strcat(importpath, '/exclfiltCAR-NBT-mat'));
+subj = cl_alpha3alpha2(strcat(importpath, '/exclfiltCAR-NBT-mat'), importpath);

@@ -156,12 +156,12 @@ for i = 1:numel(files)
         % outside of expected range.
         channelPeakObj = nbt_doPeakFit(Signal(:,j), SignalInfo);
         if isnan(channelPeakObj.IAF) || channelPeakObj.IAF < 7 || channelPeakObj.IAF > 13
-            subj = cl_correctBadFit(subj, 'IAF', i, j, false, false);
+            subj = cl_correctBadFits(subj, 'IAF', channelPeakObj, Signal, SignalInfo, i, j, false, false);
         else
             subj(i).IAFs(j) = channelPeakObj.IAF;
         end
         if isnan(channelPeakObj.TF) || channelPeakObj.TF < 4 || channelPeakObj.TF > 7
-            subj = cl_correctBadFit(subj, 'TF', i, j, false, false);
+            subj = cl_correctBadFits(subj, 'TF', channelPeakObj, Signal, SignalInfo, i, j, false, false);
         else
             subj(i).TFs(j) = channelPeakObj.TF;
         end

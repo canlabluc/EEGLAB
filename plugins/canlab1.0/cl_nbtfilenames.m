@@ -34,13 +34,12 @@ if (~exist('exportpath', 'var'))
     fprintf('Export path: %s\n', exportpath);
 end
 
-cd ~/nbt;
-installNBT;
 files = dir(fullfile(strcat(importpath, '/*.set')));
 for id = 1:numel(files)
     study   = files(id).name(1:3);
     session = files(id).name(4:6);
     subject = files(id).name(7:9);
+    disp(strcat(importpath, '/', files(id).name));
     copyfile(strcat(importpath, '/', files(id).name), strcat(exportpath, ...
         sprintf('/%s%s.%s.yyyymmdd.RS.set', study, session, subject)));
 end

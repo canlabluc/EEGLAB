@@ -15,19 +15,19 @@
 %               'TF': Transition Frequency
 %               'IAF': Individualized Alpha Frequency
 % 
-% i:        Subject index within cl_alpha3alpha2 or cl_alphatheta
+% i: Subject index within cl_alpha3alpha2 or cl_alphatheta
 % 
-% j:        Channel index within cl_alpha3alpha2 or cl_alphatheta
+% j: Channel index within cl_alpha3alpha2 or cl_alphatheta
 % 
 % rejectBadFits: SET BY CL_ALPHATHETA OR CL_ALPHA3ALPHA2.
 % 
 % guiFit:        SET BY CL_ALPHATHETA OR CL_ALPHA3ALPHA2. 
 
-function subj = cl_correctBadFits(subj, measure,i, j, rejectBadFits, guiFit)
+function subj = cl_correctBadFits(subj, measure, channelPeakObj, Signal, SignalInfo, i, j, rejectBadFits, guiFit)
 
 fprintf('ERROR: %s calculated by NBT: %d\n', measure, channelPeakObj.IAF);
 fprintf('Fitting polynomial in order to recalculate %s...\n', measure);
-if measure == 'IAF'
+if strcmp(measure, 'IAF') == 1
     subj(i).inspectedIAFs(j) = j;
 else
     subj(i).inspectedTFs(j) = j;
@@ -37,7 +37,8 @@ ws = warning('off', 'all');
 p  = polyfit(freqs', spectra, 15);
 warning(ws);
 y1 = polyval(p, freqs');
-if measure == 'IAF'
+if strcmp(measure, 'IAF') == 1
+    % Find max between 7 and 13
     [dummy, ind] = max(y1(find(freqs > 7):find(freqs > 13, 1)));
     if freqs(ind) > 12.9 || freqs(ind) < 7
         if guiFit == true
@@ -58,6 +59,7 @@ if measure == 'IAF'
         subj(i).IAFs(j) = freqs(ind);
     end
 else % measure == 'TF'
+     % Find minimum between 1 and 7.5
     [dummy, ind] = min(y1(1:find(freqs > 7.5, 1)));
     if freqs(ind) > 6.9 || freqs(ind) < 3
         if guiFit == true
