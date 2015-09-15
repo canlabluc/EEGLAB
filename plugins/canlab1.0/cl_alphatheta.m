@@ -189,7 +189,7 @@ for i = 1:numel(files)
             subj(i).C3(C3Added).IAF = C3PeakFit.IAF;
             subj(i).C3(C3Added).TF  = C3PeakFit.TF;
             C3Added = C3Added + 1;
-        else if any(O1trodes == j)
+        elseif any(O1trodes == j)
             O1PeakFit = nbt_doPeakFit(Signal(:,j), SignalInfo);
             subj(i).O1(O1Added).Signal = Signal(:,j);
             if isnan(O1PeakFit.IAF) || O1PeakFit.IAF < 7 || O1PeakFit.IAF > 13

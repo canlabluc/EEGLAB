@@ -51,7 +51,7 @@
 % 4. Calculate the alpha3/alpha2 power ratio using both traditional and 
 %    individualized frequency bands.
 
-function subj = cl_alpha3alpha2(importpath, exportpath, rejectBadFits, guiFit)
+function subj = cl_alpha3alpha2(importpath, exportpath, grandAvg, rejectBadFits, guiFit)
 
 if (~exist('importpath', 'var'))
     importpath = uigetdir('~', 'Select folder to import .cnt files from');
@@ -67,6 +67,9 @@ if (~exist('exportpath', 'var'))
     end
     fprintf('Export path: %s\n', exportpath);
 end
+if (~exist('grandAvg', 'var'))
+    grandAvg = false;
+end
 if (~exist('rejectBadFits', 'var'))
     rejectBadFits = false;
 end
@@ -74,22 +77,20 @@ if (~exist('guiFit', 'var'))
     guiFit = false;
 end
 
-cd ~/nbt
-installNBT;
 files = dir(fullfile(strcat(importpath, '/*S.mat')));
 % Preallocation of memory
 subj(size(files, 1)) = struct();
 [Signal, SignalInfo, path] = nbt_load_file(strcat(importpath, '/', files(1).name));
 subj(:) = struct('SubjectID', 'SXXX',...
-                 'meanIAF', 0.0,... % These are found by first finding the IAF and
-                 'meanTF', 0.0,...  % TF of every channel, and then averaging them
+                 'IAF', 0.0,... % These are found by first finding the IAF and
+                 'TF', 0.0,...  % TF of every channel, and then averaging them
                  'ratio_Alpha32', 0.0,...
                  'ratio_Alpha32Fixed', 0.0,...
                  'ratio_AlphaTheta', 0.0,...
                  'ratio_AlphaThetaFixed', 0.0,...
                  'IAFs', zeros(1, size(Signal,2)),...
                  'TFs',  zeros(1, size(Signal,2)),...
-                 'Signal', zeros(1, size(Signal,1)),...
+                 'avgSignal', zeros(1, size(Signal,1)),...
                  'rejectedIAFs', [],...
                  'rejectedTFs',  [],...
                  'inspectedIAFs', zeros(1, size(Signal,2)),...
@@ -149,65 +150,62 @@ tic;
 for i = 1:numel(files)
     [Signal, SignalInfo, path] = nbt_load_file(strcat(importpath, '/', files(i).name));
     subj(i).SubjectID = files(i).name;
-    for j = 1:size(Signal,2)
-        fprintf('---- SUBJECT %s: CHANNEL %d ----\n', subj(i).SubjectID(9:11), j);
-        % Calculate IAF, TF for each channel, and then find the average for
-        % the IAF and TF, excluding NaN values and those that fall completely
-        % outside of expected range.
-        channelPeakObj = nbt_doPeakFit(Signal(:,j), SignalInfo);
-        if isnan(channelPeakObj.IAF) || channelPeakObj.IAF < 7 || channelPeakObj.IAF > 13
-            subj = cl_correctBadFits(subj, 'IAF', channelPeakObj, Signal, SignalInfo, i, j, false, false);
-        else
-            subj(i).IAFs(j) = channelPeakObj.IAF;
+    if grandAvg == false
+        for j = 1:size(Signal,2)
+            fprintf('---- SUBJECT %s: CHANNEL %d ----\n', subj(i).SubjectID(9:11), j);
+            % Calculate IAF, TF for each channel, and then find the average for
+            % the IAF and TF, excluding NaN values and those that fall completely
+            % outside of expected range.
+            channelPeakObj = nbt_doPeakFit(Signal(:,j), SignalInfo);
+            if isnan(channelPeakObj.IAF) || channelPeakObj.IAF < 7 || channelPeakObj.IAF > 13
+                subj = cl_correctBadFits(subj, 'IAF', channelPeakObj, Signal, SignalInfo, i, j, false, true);
+            else
+                subj(i).IAFs(j) = channelPeakObj.IAF;
+            end
+            if isnan(channelPeakObj.TF) || channelPeakObj.TF < 4 || channelPeakObj.TF > 7
+                subj = cl_correctBadFits(subj, 'TF', channelPeakObj, Signal, SignalInfo, i, j, false, false);
+            else
+                subj(i).TFs(j) = channelPeakObj.TF;
+            end
+            fprintf('IAF: %d\n', subj(i).IAFs(j));
+            fprintf('TF:  %d\n', subj(i).TFs(j));
+        end        
+        % Calculate overall IAF and TF for this subject
+        if rejectBadFits == true
+            rejectIAFs = subj(i).IAFs == 0;
+            rejectTFs  = subj(i).TFs == 0;
+            subj(i).IAFs(rejectIAFs) = [];
+            subj(i).TFs(rejectTFs) = [];
         end
-        if isnan(channelPeakObj.TF) || channelPeakObj.TF < 4 || channelPeakObj.TF > 7
-            subj = cl_correctBadFits(subj, 'TF', channelPeakObj, Signal, SignalInfo, i, j, false, false);
-        else
-            subj(i).TFs(j) = channelPeakObj.TF;
-        end
-        fprintf('IAF: %d\n', subj(i).IAFs(j));
-        fprintf('TF:  %d\n', subj(i).TFs(j));
-    end        
-    % Calculate overall IAF and TF for this subject
-    if rejectBadFits == true
-        rejectIAFs = subj(i).IAFs == 0;
-        rejectTFs  = subj(i).TFs == 0;
-        subj(i).IAFs(rejectIAFs) = [];
-        subj(i).TFs(rejectTFs) = [];
+        subj(i).IAF = mean(subj(i).IAFs);
+        subj(i).TF  = mean(subj(i).TFs);
+    else % grandAvg == true
+        subj(i).avgSignal = mean(Signal');
+        grandAvg_PeakObj  = nbt_doPeakFit(subj(i).avgSignal', SignalInfo);
+        subj(i).IAF = grandAvg_PeakObj.IAF;
+        subj(i).TF  = grandAvg_PeakObj.TF;
     end
-    subj(i).meanIAF = mean(subj(i).IAFs);
-    subj(i).meanTF  = mean(subj(i).TFs);
-    % Take the grand average for the subject, then find PSD of grand average
+
     [avgPSD, avgFreq] = spectopo(mean(Signal'), 0, 512, 'plot', 'off');
-    subj(i).Signal  = mean(Signal');
     subj(i).avgPSD  = avgPSD;
     subj(i).avgFreq = avgFreq;
     
     % ----------------------------------------------------- %
     % Use IAF and TF to find individualized frequency bands %
     % ----------------------------------------------------- %
-
-    subj(i).deltaFloor    = subj(i).meanTF - 4;
-    subj(i).deltaCeiling  = subj(i).meanTF - 2;
-    subj(i).thetaFloor    = subj(i).meanTF - 2;
-    subj(i).thetaCeiling  = subj(i).meanTF;
-    subj(i).alphaFloor    = subj(i).meanTF;
-    subj(i).alpha1Floor   = subj(i).meanTF;
-    subj(i).alpha1Ceiling = (subj(i).meanIAF + subj(i).meanTF) / 2;
-    subj(i).alpha2Floor   = (subj(i).meanIAF + subj(i).meanTF) / 2;
-    subj(i).alpha2Ceiling = subj(i).meanIAF;
-    subj(i).alpha3Floor   = subj(i).meanIAF;
-    subj(i).alpha3Ceiling = subj(i).meanIAF + 2;
-    subj(i).alphaCeiling  = subj(i).meanIAF + 2;
-    % TODO: Find peaks and troughs, use to calculate these
-    %subj(i).Beta1_floor   = 
-    %subj(i).Beta1_ceiling = 
-    %subj(i).Beta2_floor   = 
-    %subj(i).Beta2_ceiling = 
-    %subj(i).gammaFloor    = 
-    % Gamma ceiling already set
-    % In case TF is below 4.5, readjust deltaFloor so we don't get incorrect
-    % power calculations 
+    
+    subj(i).deltaFloor    = subj(i).TF - 4;
+    subj(i).deltaCeiling  = subj(i).TF - 2;
+    subj(i).thetaFloor    = subj(i).TF - 2;
+    subj(i).thetaCeiling  = subj(i).TF;
+    subj(i).alphaFloor    = subj(i).TF;
+    subj(i).alpha1Floor   = subj(i).TF;
+    subj(i).alpha1Ceiling = (subj(i).IAF + subj(i).TF) / 2;
+    subj(i).alpha2Floor   = (subj(i).IAF + subj(i).TF) / 2;
+    subj(i).alpha2Ceiling = subj(i).IAF;
+    subj(i).alpha3Floor   = subj(i).IAF;
+    subj(i).alpha3Ceiling = subj(i).IAF + 2;
+    subj(i).alphaCeiling  = subj(i).IAF + 2;
     if subj(i).deltaFloor < 0.5
         subj(i).deltaFloor = 0.5;
     end
@@ -230,9 +228,9 @@ for i = 1:numel(files)
     subj(i).deltaPower  = calculatePower(avgPSD, avgFreq, subj(i).deltaFloor,  subj(i).deltaCeiling);
     subj(i).thetaPower  = calculatePower(avgPSD, avgFreq, subj(i).thetaFloor,  subj(i).thetaCeiling);
     subj(i).alphaPower  = calculatePower(avgPSD, avgFreq, subj(i).alphaFloor,  subj(i).alphaCeiling);
-    subj(i).alpha1Power = calculatePower(avgPSD, avgFreq, subj(i).meanTF,      subj(i).alpha2Floor);
-    subj(i).alpha2Power = calculatePower(avgPSD, avgFreq, subj(i).alpha2Floor, subj(i).meanIAF);
-    subj(i).alpha3Power = calculatePower(avgPSD, avgFreq, subj(i).meanIAF,     subj(i).alpha3Ceiling);
+    subj(i).alpha1Power = calculatePower(avgPSD, avgFreq, subj(i).TF,      subj(i).alpha2Floor);
+    subj(i).alpha2Power = calculatePower(avgPSD, avgFreq, subj(i).alpha2Floor, subj(i).IAF);
+    subj(i).alpha3Power = calculatePower(avgPSD, avgFreq, subj(i).IAF,     subj(i).alpha3Ceiling);
     
     % Compute ratios using both fixed and calculated bands
     subj(i).ratio_Alpha32    = subj(i).alpha3Power / subj(i).alpha2Power;

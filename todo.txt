@@ -1,6 +1,4 @@
 - Change corresponding GUI calls to reflect functions. See e.g. SIFT for how to do callbacks
 - Add simple GUIs to functions, e.g. like EEGLAB
 - Have functions create directories that user specifies, if they do not already exist
-- Errors in pipeline:
-    - cl_nbtfilenames returns cd exportpath; error
 

@@ -1,5 +1,6 @@
 function subj = cl_pipeline(importpath)
 
+grandAvg = true;
 rsFreq = 512;
 chExclusion = 'extClinicalCh';
 lowerFreq  = 0.5;
@@ -26,4 +27,4 @@ cl_excludechannels(strcat(importpath, '/raw-set'), strcat(importpath, '/excl-set
 cl_bandpassfilter(strcat(importpath, '/excl-set'), strcat(importpath, '/exclfilt-set'), lowerFreq, higherFreq);
 cl_rereference(strcat(importpath, '/exclfilt-set'), strcat(importpath, '/exclfiltCAR-set'), 'CAR');
 cl_nbtfilenames(strcat(importpath, '/exclfiltCAR-set'), strcat(importpath, '/exclfiltCAR-NBT-mat'));
-subj = cl_alpha3alpha2(strcat(importpath, '/exclfiltCAR-NBT-mat'), importpath);
+subj = cl_alpha3alpha2(strcat(importpath, '/exclfiltCAR-NBT-mat'), importpath, grandAvg);

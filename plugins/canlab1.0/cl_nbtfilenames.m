@@ -43,4 +43,6 @@ for id = 1:numel(files)
     copyfile(strcat(importpath, '/', files(id).name), strcat(exportpath, ...
         sprintf('/%s%s.%s.yyyymmdd.RS.set', study, session, subject)));
 end
+disp('strcat(exportpath, /)):');
+disp(strcat(exportpath, '/'));
 nbt_import_files(strcat(exportpath, '/'), strcat(exportpath, '/'));
