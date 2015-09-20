@@ -28,7 +28,7 @@
 % Algorithm:
 % 
 
-function subj = cl_alphatheta(importpath, exportpath, rejectBadFits, guiFit)
+function subj = cl_alphatheta(importpath, exportpath, method, rejectBadFits, guiFit)
 
 C3trodes = [11 15 17 20];
 O1trodes = [25 26 27];
@@ -41,11 +41,14 @@ if (~exist('importpath', 'var'))
     fprintf('Import path: %s\n', importpath);
 end
 if (~exist('exportpath', 'var'))
-    exportpath   = uigetdir('~', 'Select folder to export .set files to');
+    exportpath = uigetdir('~', 'Select folder to export .set files to');
     if exportpath == 0
         error('Error: Please specify the folder to export the .set files to.');
     end
+end
     fprintf('Export path: %s\n', exportpath);
+if (~exist('method', 'var'))
+    method = 'default';
 end
 if (~exist('rejectBadFits', 'var'))
     rejectBadFits = false;
@@ -54,14 +57,11 @@ if (~exist('guiFit', 'var'))
     guiFit = false;
 end
 
-cd ~/nbt
-installNBT;
 files = dir(fullfile(strcat(importpath, '/*S.mat')));
-% Preallocation
+% Preallocation of memory
+[Signal, SignalInfo, path] = nbt_load_file(strcat(importpath, '/', files(1).name));
 subj(size(files,1)) = struct();
 subj(:) = struct('SubjectID', 'SXXX',...
-                 'C3', struct(),...
-                 'O1', struct(),...
                  'avgC3Signal', zeros(1, 10240),...
                  'avgO1Signal', zeros(1, 10240),...
                  'C3IAF', 0.0,... % These will store the IAF and TF for the 
@@ -72,6 +72,12 @@ subj(:) = struct('SubjectID', 'SXXX',...
                  'O1_AlphaThetaRatio', 0.0,...
                  'C3_AlphaThetaRatio_fixed', 0.0,...
                  'O1_AlphaThetaRatio_fixed', 0.0,...
+                 'C3Added', 1,...
+                 'O1Added', 1,...
+                 'rejectedIAFs', [],...
+                 'rejectedTFs',  [],...
+                 'inspectedIAFs', zeros(1, size(Signal,2)),...
+                 'inspectedTFs',  zeros(1, size(Signal,2)),...
                  'C3deltaFloor', 0.0,...
                  'C3deltaCeiling', 0.0,...
                  'C3thetaFloor', 0.0,...
@@ -153,10 +159,10 @@ subj(:) = struct('SubjectID', 'SXXX',...
                  'C3betaPower_fixed', 0.0,...
                  'C3gammaPower_fixed', 0.0);
 for i = 1:numel(files)
-    for j = 1:numel(C3)
+    for j = 1:numel(C3trodes)
         subj(i).C3(j) = struct('Signal', zeros(10240, 1), 'IAF', 0.0, 'TF', 0.0);
     end
-    for k = 1:numel(O1)
+    for k = 1:numel(O1trodes)
         subj(i).O1(k) = struct('Signal', zeros(10240, 1), 'IAF', 0.0, 'TF', 0.0);
     end
 end
@@ -168,51 +174,75 @@ tic;
 for i = 1:numel(files)
     [Signal, SignalInfo, path] = nbt_load_file(strcat(importpath, '/', files(i).name));
     subj(i).SubjectID = files(i).name(9:11);
-    % Store information such as signal, IAF, and TF for each electrode that
-    % makes up either C3 or O1
-    C3Added = 1;
-    O1Added = 1;
-    for j = 1:size(Signal, 2)
-        if any(C3trodes == j)
-            C3PeakFit = nbt_doPeakFit(Signal(:,j), SignalInfo);
-            subj(i).C3(C3Added).Signal = Signal(:,j);
-            if isnan(C3PeakFit.IAF) || C3PeakFit.IAF < 7 || C3PeakFit.IAF > 13
-                subj = cl_correctBadFits(subj, 'IAF', i, j, rejectBadFits, guiFit);
-            else
-                subj(i).IAFs(j) = C3PeakFit.IAF;
+    % default
+    %   
+    %   For each C3 electrode, computes the IAF/TF
+    %   For each O1 electrode, computes the IAF/TF
+    %   Takes grand average of C3 electrodes
+    %   Takes grand average of O1 electrodes
+    %   Using the average C3 IAF / average C3 TF, compute individualized power using
+    %   the PSD of the C3 grand average
+    %   Using the average O1 IAF / average O1 TF, compute individualized power using
+    %   the PSD of the O1 grand average
+    %      
+    if strcmp(method, 'default')
+        for j = 1:size(Signal, 2)
+            if any(C3trodes == j)
+                C3PeakFit = nbt_doPeakFit(Signal(:,j), SignalInfo);
+                subj(i).C3(subj(i).C3Added).Signal = Signal(:,j);
+                if isnan(C3PeakFit.IAF) || C3PeakFit.IAF < 7 || C3PeakFit.IAF > 13
+                    subj = cl_correctBadFits(subj, 'IAF', 'C3_alphatheta', C3PeakFit, Signal, SignalInfo, i, j, false, false);
+                else
+                    subj(i).C3(subj(i).C3Added).IAF = C3PeakFit.IAF;
+                    subj(i).C3Added = subj(i).C3Added + 1;
+                end
+                if isnan(C3PeakFit.TF) || C3PeakFit.TF < 4 || C3PeakFit.TF > 7
+                    subj = cl_correctBadFits(subj, 'TF', 'C3_alphatheta', C3PeakFit, Signal, SignalInfo, i, j, false, false);
+                else
+                    subj(i).C3(subj(i).C3Added).TF  = C3PeakFit.TF;
+                    subj(i).C3Added = subj(i).C3Added + 1;
+                end
+            elseif any(O1trodes == j)
+                O1PeakFit = nbt_doPeakFit(Signal(:,j), SignalInfo);
+                subj(i).O1(subj(i).O1Added).Signal = Signal(:,j);
+                if isnan(O1PeakFit.IAF) || O1PeakFit.IAF < 7 || O1PeakFit.IAF > 13
+                    subj = cl_correctBadFits(subj, 'IAF', 'O1_alphatheta', O1PeakFit, Signal, SignalInfo, i, j, false, false);
+                else
+                    subj(i).O1(subj(i).O1Added).IAF = O1PeakFit.IAF;
+                    subj(i).O1Added = subj(i).O1Added + 1;
+                end
+                if isnan(O1PeakFit.TF) || O1PeakFit.TF < 4 || O1PeakFit.TF > 7
+                    subj = cl_correctBadFits(subj, 'TF', 'O1_alphatheta', O1PeakFit, Signal, SignalInfo, i, j, false, false);
+                else
+                    subj(i).O1(subj(i).O1Added).TF  = O1PeakFit.TF;
+                    subj(i).O1Added = subj(i).O1Added + 1;
+                end                
             end
-            if isnan(C3PeakFit.TF) || C3PeakFit.TF < x || C3PeakFit.TF > y
-                subj = cl_correctBadFits(subj, 'TF', i, j, rejectBadFits, guiFit);
-            else
-                subj(i).TFs(j) = C3PeakFit.TF;
+        end
+    % avgPSD
+    % 
+    %   Compute the average C3 PSD, using all C3 electrodes
+    %   Compute the average O1 PSD, using all O1 electrodes
+    %   Use 15th order polynomial to calculate max and min for both PSDs
+    %   The maximum in the 7 - 13 Hz range is the IAF
+    %   The minimum in the 1 - 7 Hz range is the TF
+    %   Calculate individualized power using these measurements
+    %   
+    elseif strcmp(method, 'avgPSD')
+        for j = 1:size(Signal, 2)
+            if any(C3trodes == j)
+                disp('Hello world!');
+            elseif any (O1trodes == j)
+                disp('Hello world!');
             end
-            subj(i).C3(C3Added).IAF = C3PeakFit.IAF;
-            subj(i).C3(C3Added).TF  = C3PeakFit.TF;
-            C3Added = C3Added + 1;
-        elseif any(O1trodes == j)
-            O1PeakFit = nbt_doPeakFit(Signal(:,j), SignalInfo);
-            subj(i).O1(O1Added).Signal = Signal(:,j);
-            if isnan(O1PeakFit.IAF) || O1PeakFit.IAF < 7 || O1PeakFit.IAF > 13
-                subj = cl_correctBadFits(subj, 'IAF', i, j, rejectBadFits, guiFit);
-            else
-                subj(i).IAFs(j) = O1PeakFit.IAF;
-            end
-            if isnan(O1PeakFit.TF) || O1PeakFit.TF < x || O1PeakFit.TF > y
-                subj = cl_correctBadFits(subj, 'TF', i, j, rejectBadFits, guiFit);
-            else
-                subj(i).TFs(j) = O1PeakFit.TF;
-            end
-            subj(i).O1(O1Added).IAF = O1PeakFit.IAF;
-            subj(i).O1(O1Added).TF  = O1PeakFit.TF;
-            O1Added = O1Added + 1;
         end
     end
     % Find grand average of the aforementioned electrodes, and calculate overall
     % IAF and TF for this subject, in both the C3 and O1 electrodes
-    subj(i).C3meanTF  = mean(subj(i).C3(:).TFs);
-    subj(i).C3meanIAF = mean(subj(i).C3(:).IAFs);
-    subj(i).O1meanTF  = mean(subj(i).O1(:).TFs);
-    subj(i).O1meanIAF = mean(subj(i).O1(:).IAFs);
+    subj(i).C3meanTF  = mean(subj(i).C3(:).TF);
+    subj(i).C3meanIAF = mean(subj(i).C3(:).IAF);
+    subj(i).O1meanTF  = mean(subj(i).O1(:).TF);
+    subj(i).O1meanIAF = mean(subj(i).O1(:).IAF);
 
     subj(i).avgC3Signal = subj(i).C3(1).Signal;
     subj(i).avgO1Signal = subj(i).O1(1).Signal;
@@ -229,8 +259,6 @@ for i = 1:numel(files)
 
     C3PeakFit = nbt_doPeakFit(subj(i).avgC3Signal, SignalInfo);
     O1PeakFit = nbt_doPeakFit(subj(i).avgO1Signal, SignalInfo);
-    % Makes sure that IAFs and TFs for both expected values -- if nbt_doPeakFit
-    % failed to properly fit peaks, it returns NaN or values < 1
     subj(i).C3deltaFloor    = subj(i).C3meanTF - 4;
     subj(i).C3deltaCeiling  = subj(i).C3meanTF - 2;
     subj(i).C3thetaFloor    = subj(i).C3meanTF - 2;
@@ -243,19 +271,9 @@ for i = 1:numel(files)
     subj(i).C3alpha3Floor   = subj(i).C3meanIAF;
     subj(i).C3alpha3Ceiling = subj(i).C3meanIAF + 2;
     subj(i).C3alphaCeiling  = subj(i).C3meanIAF + 2;
-    % TODO: Find peaks and troughs, use to calculate these
-    %subj(i).Beta1_floor   = 
-    %subj(i).Beta1_ceiling = 
-    %subj(i).Beta2_floor   = 
-    %subj(i).Beta2_ceiling = 
-    %subj(i).gammaFloor    = 
-    % Gamma ceiling already set
-    % In case TF is below 4.5, readjust deltaFloor so we don't get incorrect
-    % power calculations 
     if subj(i).C3deltaFloor < 0.5
         subj(i).C3deltaFloor = 0.5;
     end
-
 
     subj(i).O1deltaFloor    = subj(i).O1meanTF - 4;
     subj(i).O1deltaCeiling  = subj(i).O1meanTF - 2;
@@ -269,15 +287,6 @@ for i = 1:numel(files)
     subj(i).O1alpha3Floor   = subj(i).O1meanIAF;
     subj(i).O1alpha3Ceiling = subj(i).O1meanIAF + 2;
     subj(i).O1alphaCeiling  = subj(i).O1meanIAF + 2;
-    % TODO: Find peaks and troughs, use to calculate these
-    %subj(i).Beta1_floor   = 
-    %subj(i).Beta1_ceiling = 
-    %subj(i).Beta2_floor   = 
-    %subj(i).Beta2_ceiling = 
-    %subj(i).gammaFloor    = 
-    % Gamma ceiling already set
-    % In case TF is below 4.5, readjust deltaFloor so we don't get incorrect
-    % power calculations 
     if subj(i).O1deltaFloor < 0.5
         subj(i).O1deltaFloor = 0.5;
     end

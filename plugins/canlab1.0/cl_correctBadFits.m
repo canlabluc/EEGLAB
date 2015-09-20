@@ -23,7 +23,8 @@
 % 
 % guiFit:        SET BY CL_ALPHATHETA OR CL_ALPHA3ALPHA2. 
 
-function subj = cl_correctBadFits(subj, measure, channelPeakObj, Signal, SignalInfo, i, j, rejectBadFits, guiFit)
+function subj = cl_correctBadFits(subj, measure, analysisType, channelPeakObj,...
+                                 Signal, SignalInfo, i, j, rejectBadFits, guiFit)
 
 fprintf('ERROR: %s calculated by NBT: %d\n', measure, channelPeakObj.IAF);
 fprintf('Fitting polynomial in order to recalculate %s...\n', measure);
@@ -37,7 +38,7 @@ ws = warning('off', 'all');
 p  = polyfit(freqs', spectra, 15);
 warning(ws);
 y1 = polyval(p, freqs');
-if strcmp(measure, 'IAF') == 1
+if strcmp(measure, 'IAF')
     % Find max between 7 and 13
     [dummy, ind] = max(y1(find(freqs > 7):find(freqs > 13, 1)));
     if freqs(ind) > 12.9 || freqs(ind) < 7
@@ -45,20 +46,38 @@ if strcmp(measure, 'IAF') == 1
             disp('IAF is too low or too high. Confirm by clicking: ');
             spectopo(Signal(:,j)', 0, SignalInfo.converted_sample_frequency, 'freqrange', [0 16]);
             [x, y] = ginput(1);
-            subj(i).IAFs(j) = x;
+            if strcmp(analysisType, 'C3_alphatheta')
+                subj(i).C3(subj(i).chAdded).IAF = x;
+            elseif strcmp(analysisType, 'O1_alphatheta')
+                subj(i).O1(subj(i).chAdded).IAF = x;
+            else % analysisType == cl_alpha3alpha2
+                subj(i).IAFs(j) = x;   
+            end
             close(2);
         elseif rejectBadFits == true
             disp('IAF is too low or too high. Rejecting calculated IAF.');
             subj(i).rejectedIAFs = [subj(i).rejectedIAFs, j];
-        else
+        else % rejectBadFits, guiFit == false
             disp('IAF is too low or too high. Choosing IAF = 9 Hz');
-            subj(i).IAFs(j) = 9;
+            if strcmp(analysisType, 'C3_alphatheta')
+                subj(i).C3(subj(i).chAdded).IAF = 9;
+            elseif strcmp(analysisType, 'O1_alphatheta')
+                subj(i).O1(subj(i).chAdded).IAF = 9;
+            else
+                subj(i).IAFs(j) = 9;
+            end
         end
     else
         % Polynomial-derived IAF is reasonable
-        subj(i).IAFs(j) = freqs(ind);
+        if strcmp(analysisType, 'C3_alphatheta')
+            subj(i).C3(subj(i).chAdded).IAF = freqs(ind);
+        elseif strcmp(analysisType, 'O1_alphatheta')
+            subj(i).O1(subj(i).chAdded).IAF = freqs(ind);
+        else
+            subj(i).IAFs(j) = freqs(ind);
+        end
     end
-else % measure == 'TF'
+elseif strcmp(measure, 'TF')
      % Find minimum between 1 and 7.5
     [dummy, ind] = min(y1(1:find(freqs > 7.5, 1)));
     if freqs(ind) > 6.9 || freqs(ind) < 3
@@ -66,18 +85,38 @@ else % measure == 'TF'
             disp('TF is too low or too high. Confirm by clicking: ');
             spectopo(Signal(:,j)', 0, SignalInfo.converted_sample_frequency, 'freqrange', [0 16]);
             [x, y] = ginput(1);
-            subj(i).TFs(j) = x;
+            if strcmp(analysisType, 'C3_alphatheta')
+                subj(i).C3(subj(i).chAdded).TF = x;
+            elseif strcmp(analysisType, 'O1_alphatheta')
+                subj(i).O1(subj(i).chAdded).TF = x;
+            else % analysisType == cl_alpha3alpha2
+                subj(i).TFs(j) = x;   
+            end
             close(2);
         elseif rejectBadFits == true
             disp('TF is too low or too high. Rejecting calculated TF.');
             subj(i).rejectedTFs = [subj(i).rejectedTFs, j];
-        else
+        else % rejectBadFits, guiFit == false
             disp('TF is too low or too high. Choosing TF = 4.5 Hz');
-            subj(i).TFs(j) = 4.5;
+            if strcmp(analysisType, 'C3_alphatheta')
+                subj(i).C3(subj(i).chAdded).TF = 4.5;
+            elseif strcmp(analysisType, 'O1_alphatheta')
+                subj(i).O1(subj(i).chAdded).TF = 4.5;
+            else
+                subj(i).TFs(j) = 4.5;
+            end
         end
     else
         % Polynomial-derived TF is reasonable
-        subj(i).TFs(j) = freqs(ind);
+        if strcmp(analysisType, 'C3_alphatheta')
+            subj(i).C3(subj(i).chAdded).TF = freqs(ind);
+        elseif strcmp(analysisType, 'O1_alphatheta')
+            subj(i).O1(subj(i).chAdded).TF = freqs(ind);
+        else
+            subj(i).TFs(j) = freqs(ind);
+        end
     end
+else
+    error('Please specify the measure parameter to cl_correctBadFits');
 end
 end

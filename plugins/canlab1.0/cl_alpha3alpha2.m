@@ -51,7 +51,7 @@
 % 4. Calculate the alpha3/alpha2 power ratio using both traditional and 
 %    individualized frequency bands.
 
-function subj = cl_alpha3alpha2(importpath, exportpath, grandAvg, rejectBadFits, guiFit)
+function subj = cl_alpha3alpha2(importpath, exportpath, method, rejectBadFits, guiFit)
 
 if (~exist('importpath', 'var'))
     importpath = uigetdir('~', 'Select folder to import .cnt files from');
@@ -67,8 +67,8 @@ if (~exist('exportpath', 'var'))
     end
     fprintf('Export path: %s\n', exportpath);
 end
-if (~exist('grandAvg', 'var'))
-    grandAvg = false;
+if (~exist('method', 'var'))
+    method = 'default';
 end
 if (~exist('rejectBadFits', 'var'))
     rejectBadFits = false;
@@ -91,6 +91,8 @@ subj(:) = struct('SubjectID', 'SXXX',...
                  'IAFs', zeros(1, size(Signal,2)),...
                  'TFs',  zeros(1, size(Signal,2)),...
                  'avgSignal', zeros(1, size(Signal,1)),...
+                 'avgPSD', zeros(1, 513),...
+                 'avgFreqs', zeros(513, 1),...
                  'rejectedIAFs', [],...
                  'rejectedTFs',  [],...
                  'inspectedIAFs', zeros(1, size(Signal,2)),...
@@ -150,7 +152,7 @@ tic;
 for i = 1:numel(files)
     [Signal, SignalInfo, path] = nbt_load_file(strcat(importpath, '/', files(i).name));
     subj(i).SubjectID = files(i).name;
-    if grandAvg == false
+    if strcmp(method, 'default')
         for j = 1:size(Signal,2)
             fprintf('---- SUBJECT %s: CHANNEL %d ----\n', subj(i).SubjectID(9:11), j);
             % Calculate IAF, TF for each channel, and then find the average for
@@ -179,11 +181,68 @@ for i = 1:numel(files)
         end
         subj(i).IAF = mean(subj(i).IAFs);
         subj(i).TF  = mean(subj(i).TFs);
-    else % grandAvg == true
+    elseif strcmp(method, 'grandAvg')
         subj(i).avgSignal = mean(Signal');
         grandAvg_PeakObj  = nbt_doPeakFit(subj(i).avgSignal', SignalInfo);
         subj(i).IAF = grandAvg_PeakObj.IAF;
         subj(i).TF  = grandAvg_PeakObj.TF;
+    elseif strcmp(method, 'psdAvg')
+        for j = 1:size(Signal,2)
+            [tmpPSD, tmpfreq] = spectopo(Signal(:,j)', 0, 512, 'plot', 'off');
+            subj(i).avgPSD = subj(i).avgPSD + tmpPSD;
+        end
+        subj(i).avgPSD = subj(i).avgPSD / size(Signal, 2)
+        subj(i).avgFreq = tmpfreq;
+        % Now fit a 15th order polynomial to the data:
+        ws = warning('off', 'all');           
+        p  = polyfit(subj(i).avgFreq', subj(i).avgPSD, 15);
+        warning(ws);
+        y1 = polyval(p, subj(i).avgFreq');
+        % ========== IAF ===========    
+        % Find max between 7 and 13
+        [dummy, ind] = max(y1(find(subj(i).avgFreq > 7):find(subj(i).avgFreq > 13, 1)));
+        if subj(i).avgFreq(ind) > 12.9 || subj(i).avgFreq(ind) < 7
+            if guiFit == true
+                disp('IAF is too low or too high. Confirm by clicking: ');
+                spectopo(Signal(:,j)', 0, SignalInfo.converted_sample_frequency, 'freqrange', [0 16]);
+                [x, y] = ginput(1);
+                subj(i).IAF = x;
+                close(2);
+            elseif rejectBadFits == true
+                disp('IAF is too low or too high. Rejecting calculated IAF.');
+                subj(i).rejectedIAFs = [subj(i).rejectedIAFs, j];
+            else
+                disp('IAF is too low or too high. Choosing IAF = 9 Hz');
+                subj(i).IAF = 9;
+            end
+        else
+            % Polynomial-derived IAF is reasonable
+            subj(i).IAFs(j) = subj(i).avgFreq(ind);
+        end
+        % ========= TF =========
+        % Find minimum between 1 and 7.5
+        [dummy, ind] = min(y1(1:find(subj(i).avgFreq > 7.5, 1)));
+        if subj(i).avgFreq(ind) > 6.9 || subj(i).avgFreq(ind) < 3
+            if guiFit == true
+                disp('TF is too low or too high. Confirm by clicking: ');
+                spectopo(Signal(:,j)', 0, SignalInfo.converted_sample_frequency, 'freqrange', [0 16]);
+                [x, y] = ginput(1);
+                subj(i).TF = x;
+                close(2);
+            elseif rejectBadFits == true
+                disp('TF is too low or too high. Rejecting calculated TF.');
+                subj(i).rejectedTFs = [subj(i).rejectedTFs, j];
+            else
+                disp('TF is too low or too high. Choosing TF = 4.5 Hz');
+                subj(i).TF = 4.5;
+            end
+        else
+            % Polynomial-derived TF is reasonable
+            subj(i).TF = subj(i).avgFreq(ind);
+        end
+    else
+        % Doesn't ever execute since method defaults to 'default'
+        error('Please define the method parameter in cl_alpha3alpha2');
     end
 
     [avgPSD, avgFreq] = spectopo(mean(Signal'), 0, 512, 'plot', 'off');
