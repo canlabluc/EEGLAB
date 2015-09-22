@@ -26,14 +26,14 @@
 function subj = cl_correctBadFits(subj, measure, analysisType, channelPeakObj,...
                                  Signal, SignalInfo, i, j, rejectBadFits, guiFit)
 
-fprintf('ERROR: %s calculated by NBT: %d\n', measure, channelPeakObj.IAF);
+% fprintf('ERROR: %s calculated by NBT: %d\n', measure, channelPeakObj.IAF);
 fprintf('Fitting polynomial in order to recalculate %s...\n', measure);
 if strcmp(measure, 'IAF') == 1
     subj(i).inspectedIAFs(j) = j;
 else
     subj(i).inspectedTFs(j) = j;
 end
-[spectra, freqs] = spectopo(Signal(:,j)', 0, SignalInfo.converted_sample_frequency, 'freqrange', [0 16], 'plot', 'off');
+[spectra, freqs] = spectopo(Signal(:,j)', 0, 512, 'freqrange', [0 16], 'plot', 'off');
 ws = warning('off', 'all');           
 p  = polyfit(freqs', spectra, 15);
 warning(ws);
@@ -44,7 +44,7 @@ if strcmp(measure, 'IAF')
     if freqs(ind) > 12.9 || freqs(ind) < 7
         if guiFit == true
             disp('IAF is too low or too high. Confirm by clicking: ');
-            spectopo(Signal(:,j)', 0, SignalInfo.converted_sample_frequency, 'freqrange', [0 16]);
+            spectopo(Signal(:,j)', 0, 512, 'freqrange', [0 16]);
             [x, y] = ginput(1);
             if strcmp(analysisType, 'C3_alphatheta')
                 subj(i).C3(subj(i).chAdded).IAF = x;
@@ -83,7 +83,7 @@ elseif strcmp(measure, 'TF')
     if freqs(ind) > 6.9 || freqs(ind) < 3
         if guiFit == true
             disp('TF is too low or too high. Confirm by clicking: ');
-            spectopo(Signal(:,j)', 0, SignalInfo.converted_sample_frequency, 'freqrange', [0 16]);
+            spectopo(Signal(:,j)', 0, 512, 'freqrange', [0 16]);
             [x, y] = ginput(1);
             if strcmp(analysisType, 'C3_alphatheta')
                 subj(i).C3(subj(i).chAdded).TF = x;

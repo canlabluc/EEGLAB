@@ -3,5 +3,6 @@
 % which is why the following transformation is necessary.[1][2]
 % [1]: http://sccn.ucsd.edu/pipermail/eeglablist/2015/009249.html
 % [2]: http://sccn.ucsd.edu/pipermail/eeglablist/2015/009245.html
-function absPower = calculatePower(PSD, Spectra, lowerFrequency, higherFrequency)
-absPower = nanmean(10.^(PSD(Spectra >= lowerFrequency & Spectra <= higherFrequency)/10));
+function power = calculatePower(PSD, Spectra, lowerFrequency, higherFrequency)
+power = nanmean(10.^(PSD(Spectra >= lowerFrequency & Spectra <= higherFrequency)/10));
+end

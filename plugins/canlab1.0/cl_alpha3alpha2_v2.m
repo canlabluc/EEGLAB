@@ -49,7 +49,7 @@
 %          bands for that channel. 
 %       c. Calculate fixed and individualized alpha3/alpha2 and alpha/theta 
 %          power ratios for that channel.
-% 2. The overall mean power for each band is the average power for that band
+% 2. The overall nanmean power for each band is the average power for that band
 %    across all channels. 
 
 function subj = cl_alpha3alpha2(importpath, exportpath, method, rejectBadFits, guiFit)
@@ -77,6 +77,15 @@ end
 if (~exist('guiFit', 'var'))
     guiFit = false;
 end
+
+% Write settings to text file
+fileID = fopen(strcat(pwd, '/', date, '-cl_alpha3alpha2-parameters.txt'), 'w');
+fprintf(fileID, 'importpath: %s\n', importpath)
+fprintf(fileID, 'exportpath: %s\n', exportpath)
+fprintf(fileID, 'method:     %s\n', method)
+fprintf(fileID, 'rejectBadFits: %s\n', rejectBadFits)
+fprintf(fileID, 'guiFit:     %s\n', guiFit)
+fclose(fileID)
 
 files = dir(fullfile(strcat(importpath, '/*S.mat')));
 % Preallocation of memory
@@ -159,13 +168,15 @@ for i = 1:numel(files)
         % frequency bands for each channel, and calculate power across both
         % traditional and individualized frequency bands.
         channelPeakObj = nbt_doPeakFit(Signal(:,j), SignalInfo);
-        if channelPeakObj.IAF < 7 || channelPeakObj.IAF > 13
-            subj = cl_correctBadFits(subj, 'IAF', channelPeakObj, Signal, SignalInfo, i, j);
+        if isnan(channelPeakObj.IAF) || channelPeakObj.IAF < 7 || channelPeakObj.IAF > 13
+            subj = cl_correctBadFits(subj, 'IAF', 'cl_alpha3alpha2',...
+                 channelPeakObj, Signal, SignalInfo, i, j, rejectBadFits, guiFit);
         else
             subj(i).IAFs(j) = channelPeakObj.IAF;
         end
-        if channelPeakObj.TF < 4 || channelPeakObj.TF > 7
-            subj = cl_correctBadFits(subj, 'TF', channelPeakObj, Signal, SignalInfo, i, j);
+        if isnan(channelPeakObj.TF) || channelPeakObj.TF < 4 || channelPeakObj.TF > 7
+            subj = cl_correctBadFits(subj, 'TF', 'cl_alpha3alpha2',...
+                channelPeakObj, Signal, SignalInfo, i, j, rejectBadFits, guiFit);
         else
             subj(i).TFs(j) = channelPeakObj.TF;
         end
@@ -176,81 +187,99 @@ for i = 1:numel(files)
         % Use IAF and TF to find individualized frequency bands %
         % ----------------------------------------------------- %
         
-        subj(i).deltaFloor(j)    = subj(i).TFs(j) - 4;
-        subj(i).deltaCeiling(j)  = subj(i).TFs(j) - 2;
-        subj(i).thetaFloor(j)    = subj(i).TFs(j) - 2;
-        subj(i).thetaCeiling(j)  = subj(i).TFs(j);
-        subj(i).alphaFloor(j)    = subj(i).TFs(j);
-        subj(i).alpha1Floor(j)   = subj(i).TFs(j);
-        subj(i).alpha1Ceiling(j) = (subj(i).IAFs(j) + subj(i).TFs(j)) / 2;
-        subj(i).alpha2Floor(j)   = (subj(i).IAFs(j) + subj(i).TFs(j)) / 2;
-        subj(i).alpha2Ceiling(j) = subj(i).IAFs(j);
-        subj(i).alpha3Floor(j)   = subj(i).IAFs(j);
-        subj(i).alpha3Ceiling(j) = subj(i).IAFs(j) + 2;
-        subj(i).alphaCeiling(j)  = subj(i).IAFs(j) + 2;
-        if subj(i).deltaFloor(j) < 0.5
-            subj(i).deltaFloor(j) = 0.5;
+        subj(i).ch_deltaFloor(j)    = subj(i).TFs(j) - 4;
+        subj(i).ch_deltaCeiling(j)  = subj(i).TFs(j) - 2;
+        subj(i).ch_thetaFloor(j)    = subj(i).TFs(j) - 2;
+        subj(i).ch_thetaCeiling(j)  = subj(i).TFs(j);
+        subj(i).ch_alphaFloor(j)    = subj(i).TFs(j);
+        subj(i).ch_alpha1Floor(j)   = subj(i).TFs(j);
+        subj(i).ch_alpha1Ceiling(j) = (subj(i).IAFs(j) + subj(i).TFs(j)) / 2;
+        subj(i).ch_alpha2Floor(j)   = (subj(i).IAFs(j) + subj(i).TFs(j)) / 2;
+        subj(i).ch_alpha2Ceiling(j) = subj(i).IAFs(j);
+        subj(i).ch_alpha3Floor(j)   = subj(i).IAFs(j);
+        subj(i).ch_alpha3Ceiling(j) = subj(i).IAFs(j) + 2;
+        subj(i).ch_alphaCeiling(j)  = subj(i).IAFs(j) + 2;
+        if subj(i).ch_deltaFloor(j) < 0.5
+            subj(i).ch_deltaFloor(j) = 0.5;
         end
 
         % --------------- %
         % Calculate Power %
         % --------------- %
         
-        [PSD, Freqs] = spectopo(Signal(:,j), 0, 512, 'plot', 'off');
-        subj(i).PSD(j) = PSD;
+        [PSD, Freqs] = spectopo(Signal(:,j)', 0, 512, 'plot', 'off');
+        % subj(i).PSD(j) = PSD;
 
         % Compute absolute power (amplitude^2) across fixed (traditional) frequency bands
-        subj(i).deltaPower_fixed(j)  = calculatePower(PSD, Freqs, subj(i).deltaFloor_fixed(j),  subj(i).deltaCeiling_fixed(j));
-        subj(i).thetaPower_fixed(j)  = calculatePower(PSD, Freqs, subj(i).thetaFloor_fixed(j),  subj(i).thetaCeiling_fixed(j));
-        subj(i).alphaPower_fixed(j)  = calculatePower(PSD, Freqs, subj(i).alphaFloor_fixed(j),  subj(i).alphaCeiling_fixed(j));
-        subj(i).alpha1Power_fixed(j) = calculatePower(PSD, Freqs, subj(i).betaFloor_fixed(j),   subj(i).betaCeiling_fixed(j));
-        subj(i).alpha2Power_fixed(j) = calculatePower(PSD, Freqs, subj(i).gammaFloor_fixed(j),  subj(i).gammaCeiling_fixed(j));
-        subj(i).alpha3Power_fixed(j) = calculatePower(PSD, Freqs, subj(i).alpha1Floor_fixed(j), subj(i).alpha1Ceiling_fixed(j));
-        subj(i).betaPower_fixed(j)   = calculatePower(PSD, Freqs, subj(i).alpha2Floor_fixed(j), subj(i).alpha2Ceiling_fixed(j));
-        subj(i).gammaPower_fixed(j)  = calculatePower(PSD, Freqs, subj(i).alpha3Floor_fixed(j), subj(i).alpha3Ceiling_fixed(j));
+        subj(i).ch_deltaPower_fixed(j)  = calculatePower(PSD, Freqs, subj(i).deltaFloor_fixed,  subj(i).deltaCeiling_fixed);
+        subj(i).ch_thetaPower_fixed(j)  = calculatePower(PSD, Freqs, subj(i).thetaFloor_fixed,  subj(i).thetaCeiling_fixed);
+        subj(i).ch_alphaPower_fixed(j)  = calculatePower(PSD, Freqs, subj(i).alphaFloor_fixed,  subj(i).alphaCeiling_fixed);
+        subj(i).ch_alpha1Power_fixed(j) = calculatePower(PSD, Freqs, subj(i).betaFloor_fixed,   subj(i).betaCeiling_fixed);
+        subj(i).ch_alpha2Power_fixed(j) = calculatePower(PSD, Freqs, subj(i).gammaFloor_fixed,  subj(i).gammaCeiling_fixed);
+        subj(i).ch_alpha3Power_fixed(j) = calculatePower(PSD, Freqs, subj(i).alpha1Floor_fixed, subj(i).alpha1Ceiling_fixed);
+        subj(i).ch_betaPower_fixed(j)   = calculatePower(PSD, Freqs, subj(i).alpha2Floor_fixed, subj(i).alpha2Ceiling_fixed);
+        subj(i).ch_gammaPower_fixed(j)  = calculatePower(PSD, Freqs, subj(i).alpha3Floor_fixed, subj(i).alpha3Ceiling_fixed);
 
         % Compute absolute power across individualized bands
-        subj(i).deltaPower(j)  = calculatePower(PSD, Freqs, subj(i).deltaFloor(j),  subj(i).deltaCeiling(j));
-        subj(i).thetaPower(j)  = calculatePower(PSD, Freqs, subj(i).thetaFloor(j),  subj(i).thetaCeiling(j));
-        subj(i).alphaPower(j)  = calculatePower(PSD, Freqs, subj(i).alphaFloor(j),  subj(i).alphaCeiling(j));
-        subj(i).alpha1Power(j) = calculatePower(PSD, Freqs, subj(i).TFs(j),         subj(i).alpha2Floor(j));
-        subj(i).alpha2Power(j) = calculatePower(PSD, Freqs, subj(i).alpha2Floor(j), subj(i).IAFs(j));
-        subj(i).alpha3Power(j) = calculatePower(PSD, Freqs, subj(i).IAFs(j),        subj(i).alpha3Ceiling(j));
+        subj(i).ch_deltaPower(j)  = calculatePower(PSD, Freqs, subj(i).ch_deltaFloor(j),  subj(i).ch_deltaCeiling(j));
+        subj(i).ch_thetaPower(j)  = calculatePower(PSD, Freqs, subj(i).ch_thetaFloor(j),  subj(i).ch_thetaCeiling(j));
+        subj(i).ch_alphaPower(j)  = calculatePower(PSD, Freqs, subj(i).ch_alphaFloor(j),  subj(i).ch_alphaCeiling(j));
+        subj(i).ch_alpha1Power(j) = calculatePower(PSD, Freqs, subj(i).TFs(j),            subj(i).ch_alpha2Floor(j));
+        subj(i).ch_alpha2Power(j) = calculatePower(PSD, Freqs, subj(i).ch_alpha2Floor(j), subj(i).IAFs(j));
+        subj(i).ch_alpha3Power(j) = calculatePower(PSD, Freqs, subj(i).IAFs(j),           subj(i).ch_alpha3Ceiling(j));
         
         % Compute ratios using both fixed and calculated bands
-        subj(i).chRatioAlpha32(j)    = subj(i).alpha3Power(j) / subj(i).alpha2Power(j);
-        subj(i).chRatioAlphaTheta(j) = subj(i).alphaPower(j) / subj(i).thetaPower(j);
-        subj(i).chRatioAlpha32Fixed(j)    = subj(i).alpha3Power_fixed(j) / subj(i).alpha2Power_fixed(j);
-        subj(i).chRatioAlphaThetaFixed(j) = subj(i).alphaPower_fixed(j) / subj(i).thetaPower_fixed(j);
+        subj(i).chRatioAlpha32(j)    = subj(i).ch_alpha3Power(j) / subj(i).ch_alpha2Power(j);
+        subj(i).chRatioAlphaTheta(j) = subj(i).ch_alphaPower(j) / subj(i).ch_thetaPower(j);
+        subj(i).chRatioAlpha32Fixed(j)    = subj(i).ch_alpha3Power_fixed(j) / subj(i).ch_alpha2Power_fixed(j);
+        subj(i).chRatioAlphaThetaFixed(j) = subj(i).ch_alphaPower_fixed(j) / subj(i).ch_thetaPower_fixed(j);
     end
 
-    subj(i).meanPSD = mean(subj(i).PSD);
+    % ------------------------------------- %
+    % Calculate mean power for each subject %
+    % ------------------------------------- %
+    
+    subj(i).TF  = nanmean(subj(i).TFs);
+    subj(i).IAF = nanmean(subj(i).IAFs);
 
-    subj(i).mean_deltaPower_fixed  = mean(subj(i).deltaPower_fixed);
-    subj(i).mean_thetaPower_fixed  = mean(subj(i).thetaPower_fixed);
-    subj(i).mean_alphaPower_fixed  = mean(subj(i).alphaPower_fixed);
-    subj(i).mean_alpha1Power_fixed = mean(subj(i).alpha1Power_fixed);
-    subj(i).mean_alpha2Power_fixed = mean(subj(i).alpha2Power_fixed);
-    subj(i).mean_alpha3Power_fixed = mean(subj(i).alpha3Power_fixed);
-    subj(i).mean_betaPower_fixed   = mean(subj(i).betaPower_fixed);
-    subj(i).mean_gammaPower_fixed  = mean(subj(i).gammaPower_fixed);
+    subj(i).deltaFloor    = nanmean(subj(i).ch_deltaFloor);
+    subj(i).deltaCeiling  = nanmean(subj(i).ch_deltaCeiling);
+    subj(i).thetaFloor    = nanmean(subj(i).ch_thetaFloor);
+    subj(i).thetaCeiling  = nanmean(subj(i).ch_thetaCeiling);
+    subj(i).alphaFloor    = nanmean(subj(i).ch_alphaFloor);
+    subj(i).alpha1Floor   = nanmean(subj(i).ch_alpha1Floor);
+    subj(i).alpha1Ceiling = nanmean(subj(i).ch_alpha1Ceiling);
+    subj(i).alpha2Floor   = nanmean(subj(i).ch_alpha2Floor);
+    subj(i).alpha2Ceiling = nanmean(subj(i).ch_alpha2Ceiling);
+    subj(i).alpha3Floor   = nanmean(subj(i).ch_alpha3Floor);
+    subj(i).alpha3Ceiling = nanmean(subj(i).ch_alpha3Ceiling);
+    subj(i).alphaCeiling  = nanmean(subj(i).ch_alphaCeiling);
+    
+    subj(i).deltaPower_fixed  = nanmean(subj(i).ch_deltaPower_fixed);
+    subj(i).thetaPower_fixed  = nanmean(subj(i).ch_thetaPower_fixed);
+    subj(i).alphaPower_fixed  = nanmean(subj(i).ch_alphaPower_fixed);
+    subj(i).alpha1Power_fixed = nanmean(subj(i).ch_alpha1Power_fixed);
+    subj(i).alpha2Power_fixed = nanmean(subj(i).ch_alpha2Power_fixed);
+    subj(i).alpha3Power_fixed = nanmean(subj(i).ch_alpha3Power_fixed);
+    subj(i).betaPower_fixed   = nanmean(subj(i).ch_betaPower_fixed);
+    subj(i).gammaPower_fixed  = nanmean(subj(i).ch_gammaPower_fixed);
 
-    subj(i).mean_deltaPower  = mean(subj(i).deltaPower);
-    subj(i).mean_thetaPower  = mean(subj(i).thetaPower);
-    subj(i).mean_alphaPower  = mean(subj(i).alphaPower);
-    subj(i).mean_alpha1Power = mean(subj(i).alpha1Power);
-    subj(i).mean_alpha2Power = mean(subj(i).alpha2Power);
-    subj(i).mean_alpha3Power = mean(subj(i).alpha3Power);
+    subj(i).deltaPower  = nanmean(subj(i).ch_deltaPower);
+    subj(i).thetaPower  = nanmean(subj(i).ch_thetaPower);
+    subj(i).alphaPower  = nanmean(subj(i).ch_alphaPower);
+    subj(i).alpha1Power = nanmean(subj(i).ch_alpha1Power);
+    subj(i).alpha2Power = nanmean(subj(i).ch_alpha2Power);
+    subj(i).alpha3Power = nanmean(subj(i).ch_alpha3Power);
 
-    subj(i).ratio_Alpha32 = mean(subj(i).chRatioAlpha32);
-    subj(i).ratio_Alpha32Fixed = mean(subj(i).chRatioAlpha32Fixed);
-    subj(i).ratio_AlphaTheta = mean(subj(i).chRatioAlphaTheta);
-    subj(i).ratio_AlphaThetaFixed = mean(subj(i).chRatioAlphaThetaFixed);
+    subj(i).ratio_Alpha32 = nanmean(subj(i).chRatioAlpha32);
+    subj(i).ratio_Alpha32Fixed = nanmean(subj(i).chRatioAlpha32Fixed);
+    subj(i).ratio_AlphaTheta = nanmean(subj(i).chRatioAlphaTheta);
+    subj(i).ratio_AlphaThetaFixed = nanmean(subj(i).chRatioAlphaThetaFixed);
 
-    subj(i).ratio_Alpha32_v2 = subj(i).mean_alpha3Power / subj(i).mean_alpha2Power;
-    subj(i).ratio_Alpha32Fixed_v2 = subj(i).mean_alpha3Power_fixed / subj(i).mean_alpha2Power_fixed;
-    subj(i).ratio_AlphaTheta_v2 = subj(i).mean_alphaPower / subj(i).mean_thetaPower;
-    subj(i).ratio_AlphaThetaFixed_v2 = subj(i).mean_alphaPower_fixed / subj(i).mean_thetaPower_fixed;
+    subj(i).ratio_Alpha32_v2         = subj(i).alpha3Power / subj(i).alpha2Power;
+    subj(i).ratio_Alpha32Fixed_v2    = subj(i).alpha3Power_fixed / subj(i).alpha2Power_fixed;
+    subj(i).ratio_AlphaTheta_v2      = subj(i).alphaPower / subj(i).thetaPower;
+    subj(i).ratio_AlphaThetaFixed_v2 = subj(i).alphaPower_fixed / subj(i).thetaPower_fixed;
 end
 toc;
 structFile = strcat(exportpath, '/', date, '-results', '.mat');
