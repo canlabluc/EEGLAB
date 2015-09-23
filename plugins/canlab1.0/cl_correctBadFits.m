@@ -23,15 +23,17 @@
 % 
 % guiFit:        SET BY CL_ALPHATHETA OR CL_ALPHA3ALPHA2. 
 
-function subj = cl_correctBadFits(subj, measure, analysisType, channelPeakObj,...
-                                 Signal, SignalInfo, i, j, rejectBadFits, guiFit)
+function subj = cl_correctBadFits(subj, analysisType, channelPeakObj, Signal,...
+                                  i, j, rejectBadFits, guiFit)
 
-% fprintf('ERROR: %s calculated by NBT: %d\n', measure, channelPeakObj.IAF);
-fprintf('Fitting polynomial in order to recalculate %s...\n', measure);
 if strcmp(measure, 'IAF') == 1
-    subj(i).inspectedIAFs(j) = j;
+    subj(i).misc.inspectedIAFs(j) = j;
+    fprintf('ERROR: %s calculated by NBT: %d\n', subj(i).misc.measure, channelPeakObj.IAF);
+    fprintf('Fitting polynomial in order to recalculate %s...\n', subj(i).misc.measure);
 else
-    subj(i).inspectedTFs(j) = j;
+    subj(i).misc.inspectedTFs(j) = j;
+    fprintf('ERROR: %s calculated by NBT: %d\n', subj(i).misc.measure, channelPeakObj.TF);
+    fprintf('Fitting polynomial in order to recalculate %s...\n', subj(i).misc.measure);
 end
 [spectra, freqs] = spectopo(Signal(:,j)', 0, 512, 'freqrange', [0 16], 'plot', 'off');
 ws = warning('off', 'all');           

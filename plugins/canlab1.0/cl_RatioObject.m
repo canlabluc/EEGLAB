@@ -68,3 +68,4 @@ classdef cl_RatioObject
     methods
         function subjectArray = cl_RatioObject()
             
+            
