@@ -23,10 +23,9 @@
 % 
 % guiFit:        SET BY CL_ALPHATHETA OR CL_ALPHA3ALPHA2. 
 
-function subj = cl_correctBadFits(subj, analysisType, channelPeakObj, Signal,...
-                                  i, j, rejectBadFits, guiFit)
+function subj = cl_correctBadFits(subj, channelPeakObj, Signal, i, j, rejectBadFits, guiFit)
 
-if strcmp(measure, 'IAF') == 1
+if strcmp(subj(i).misc.measure, 'IAF') == 1
     subj(i).misc.inspectedIAFs(j) = j;
     fprintf('ERROR: %s calculated by NBT: %d\n', subj(i).misc.measure, channelPeakObj.IAF);
     fprintf('Fitting polynomial in order to recalculate %s...\n', subj(i).misc.measure);
@@ -40,7 +39,11 @@ ws = warning('off', 'all');
 p  = polyfit(freqs', spectra, 15);
 warning(ws);
 y1 = polyval(p, freqs');
-if strcmp(measure, 'IAF')
+
+% ------- %
+%   IAF   %
+% ------- %
+if strcmp(subj(i).misc.measure, 'IAF')
     % Find max between 7 and 13
     [dummy, ind] = max(y1(find(freqs > 7):find(freqs > 13, 1)));
     if freqs(ind) > 12.9 || freqs(ind) < 7
@@ -48,9 +51,9 @@ if strcmp(measure, 'IAF')
             disp('IAF is too low or too high. Confirm by clicking: ');
             spectopo(Signal(:,j)', 0, 512, 'freqrange', [0 16]);
             [x, y] = ginput(1);
-            if strcmp(analysisType, 'C3_alphatheta')
+            if strcmp(subj(i).misc.analysisType, 'C3_alphatheta')
                 subj(i).C3(subj(i).chAdded).IAF = x;
-            elseif strcmp(analysisType, 'O1_alphatheta')
+            elseif strcmp(subj(i).misc.analysisType, 'O1_alphatheta')
                 subj(i).O1(subj(i).chAdded).IAF = x;
             else % analysisType == cl_alpha3alpha2
                 subj(i).IAFs(j) = x;   
@@ -58,28 +61,32 @@ if strcmp(measure, 'IAF')
             close(2);
         elseif rejectBadFits == true
             disp('IAF is too low or too high. Rejecting calculated IAF.');
-            subj(i).rejectedIAFs = [subj(i).rejectedIAFs, j];
+            subj(i).misc.rejectedIAFs = [subj(i).misc.rejectedIAFs, j];
         else % rejectBadFits, guiFit == false
             disp('IAF is too low or too high. Choosing IAF = 9 Hz');
-            if strcmp(analysisType, 'C3_alphatheta')
-                subj(i).C3(subj(i).chAdded).IAF = 9;
-            elseif strcmp(analysisType, 'O1_alphatheta')
-                subj(i).O1(subj(i).chAdded).IAF = 9;
+            if strcmp(subj(i).misc.analysisType, 'C3_alphatheta')
+                subj(i).C3(subj(i).misc.C3Added).IAF = 9;
+            elseif strcmp(subj(i).misc.analysisType, 'O1_alphatheta')
+                subj(i).O1(subj(i).misc.O1Added).IAF = 9;
             else
                 subj(i).IAFs(j) = 9;
             end
         end
     else
         % Polynomial-derived IAF is reasonable
-        if strcmp(analysisType, 'C3_alphatheta')
-            subj(i).C3(subj(i).chAdded).IAF = freqs(ind);
-        elseif strcmp(analysisType, 'O1_alphatheta')
-            subj(i).O1(subj(i).chAdded).IAF = freqs(ind);
+        if strcmp(subj(i).misc.analysisType, 'C3_alphatheta')
+            subj(i).C3(subj(i).misc.C3Added).IAF = freqs(ind);
+        elseif strcmp(subj.misc.analysisType, 'O1_alphatheta')
+            subj(i).O1(subj(i).misc.O1Added).IAF = freqs(ind);
         else
             subj(i).IAFs(j) = freqs(ind);
         end
     end
-elseif strcmp(measure, 'TF')
+
+% ------ %
+%   TF   %
+% ------ %
+elseif strcmp(subj(i).misc.measure, 'TF')
      % Find minimum between 1 and 7.5
     [dummy, ind] = min(y1(1:find(freqs > 7.5, 1)));
     if freqs(ind) > 6.9 || freqs(ind) < 3
@@ -87,33 +94,33 @@ elseif strcmp(measure, 'TF')
             disp('TF is too low or too high. Confirm by clicking: ');
             spectopo(Signal(:,j)', 0, 512, 'freqrange', [0 16]);
             [x, y] = ginput(1);
-            if strcmp(analysisType, 'C3_alphatheta')
-                subj(i).C3(subj(i).chAdded).TF = x;
-            elseif strcmp(analysisType, 'O1_alphatheta')
-                subj(i).O1(subj(i).chAdded).TF = x;
+            if strcmp(subj(i).misc.analysisType, 'C3_alphatheta')
+                subj(i).C3(subj(i).misc.C3Added).TF = x;
+            elseif strcmp(subj(i).misc.analysisType, 'O1_alphatheta')
+                subj(i).O1(subj(i).misc.O1Added).TF = x;
             else % analysisType == cl_alpha3alpha2
                 subj(i).TFs(j) = x;   
             end
             close(2);
         elseif rejectBadFits == true
             disp('TF is too low or too high. Rejecting calculated TF.');
-            subj(i).rejectedTFs = [subj(i).rejectedTFs, j];
+            subj(i).misc.rejectedTFs = [subj(i).misc.rejectedTFs, j];
         else % rejectBadFits, guiFit == false
             disp('TF is too low or too high. Choosing TF = 4.5 Hz');
-            if strcmp(analysisType, 'C3_alphatheta')
-                subj(i).C3(subj(i).chAdded).TF = 4.5;
-            elseif strcmp(analysisType, 'O1_alphatheta')
-                subj(i).O1(subj(i).chAdded).TF = 4.5;
+            if strcmp(subj(i).misc.analysisType, 'C3_alphatheta')
+                subj(i).C3(subj(i).misc.C3Added).TF = 4.5;
+            elseif strcmp(subj(i).misc.analysisType, 'O1_alphatheta')
+                subj(i).O1(subj(i).misc.O1Added).TF = 4.5;
             else
                 subj(i).TFs(j) = 4.5;
             end
         end
     else
         % Polynomial-derived TF is reasonable
-        if strcmp(analysisType, 'C3_alphatheta')
-            subj(i).C3(subj(i).chAdded).TF = freqs(ind);
-        elseif strcmp(analysisType, 'O1_alphatheta')
-            subj(i).O1(subj(i).chAdded).TF = freqs(ind);
+        if strcmp(subj(i).misc.analysisType, 'C3_alphatheta')
+            subj(i).C3(subj(i).misc.C3Added).TF = freqs(ind);
+        elseif strcmp(subj(i).misc.analysisType, 'O1_alphatheta')
+            subj(i).O1(subj(i).misc.O1Added).TF = freqs(ind);
         else
             subj(i).TFs(j) = freqs(ind);
         end
