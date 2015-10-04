@@ -1,11 +1,21 @@
 % Allocates array of structures for the appropriate analysis.
 % 
 % Usage:
-%   >> subj = cl_allocateSubj('cl_alpha3alpha2', 60, 53, 512);
-%   
+%   >> subj = cl_allocateSubj('analysisType', numSubjects, numChannels, sampleFreq);
+% Example:
+%   >> subj = cl_allocateSubj('cl_alpha3alpha2', 50, 53, 512);
+% 
 % Inputs:
 %   analysisType: Either 'cl_alpha3alpha2' or 'cl_alphatheta'
-%   
+%   numSubjects:  Number of subjects. Supposing the allocated
+%                 object is subj, each subject can then be
+%                 accessed as such: subj(1), subj(2),...
+%   numChannels:  Number of channels in each subject.
+%   sampleFreq:   Sampling frequency that EEG is in.
+% 
+% Outputs:
+%   subjectArray: Array of structures, with each structure representing a
+%                 single subject.
 
 function subjectArray = cl_allocateSubj(analysisType, numSubjects, numChannels, sampleFreq)
 

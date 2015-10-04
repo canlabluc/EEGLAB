@@ -45,11 +45,11 @@
 %                  either 7 Gz or 0 Hz), we reject these values and move on.
 %               ii. Alternatively, if guiFit is set to true, the user is 
 %                   allowed to visually select the TF or IAF.
-%       b. Calculate power across individualized and traditional frequency
+% 2. Calculate power across individualized and traditional frequency
 %          bands for that channel. 
-%       c. Calculate fixed and individualized alpha3/alpha2 and alpha/theta 
+% 3. Calculate fixed and individualized alpha3/alpha2 and alpha/theta 
 %          power ratios for that channel.
-% 2. The overall nanmean power for each band is the average power for that band
+% 4. The overall nanmean power for each band is the average power for that band
 %    across all channels. 
 
 function subj = cl_alpha3alpha2(importpath, exportpath, method, rejectBadFits, guiFit)

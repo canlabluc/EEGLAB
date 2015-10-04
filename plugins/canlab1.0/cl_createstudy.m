@@ -1,5 +1,5 @@
 % Find directory in which .sets are sitting
-importpath = '/home/sopu/Dropbox/clean_eyesc_20s'; 
+importpath = '/home/Dropbox/clean_eyesc_20s'; 
 filelist   = dir(fullfile(strcat(importpath, '/*.set')));
 
 % Create a cell to be imported into std_editset
