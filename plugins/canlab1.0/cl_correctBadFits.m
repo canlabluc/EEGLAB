@@ -65,9 +65,9 @@ if strcmp(subj(i).misc.measure, 'IAF')
         else % rejectBadFits, guiFit == false
             disp('IAF is too low or too high. Choosing IAF = 9 Hz');
             if strcmp(subj(i).misc.analysisType, 'C3_alphatheta')
-                subj(i).C3(subj(i).misc.C3Added).IAF = 9;
+                subj(i).C3(j).IAF = 9;
             elseif strcmp(subj(i).misc.analysisType, 'O1_alphatheta')
-                subj(i).O1(subj(i).misc.O1Added).IAF = 9;
+                subj(i).O1(j).IAF = 9;
             else
                 subj(i).IAFs(j) = 9;
             end
@@ -75,9 +75,9 @@ if strcmp(subj(i).misc.measure, 'IAF')
     else
         % Polynomial-derived IAF is reasonable
         if strcmp(subj(i).misc.analysisType, 'C3_alphatheta')
-            subj(i).C3(subj(i).misc.C3Added).IAF = freqs(ind);
+            subj(i).C3(j).IAF = freqs(ind);
         elseif strcmp(subj.misc.analysisType, 'O1_alphatheta')
-            subj(i).O1(subj(i).misc.O1Added).IAF = freqs(ind);
+            subj(i).O1(j).IAF = freqs(ind);
         else
             subj(i).IAFs(j) = freqs(ind);
         end
@@ -95,9 +95,9 @@ elseif strcmp(subj(i).misc.measure, 'TF')
             spectopo(Signal(:,j)', 0, 512, 'freqrange', [0 16]);
             [x, y] = ginput(1);
             if strcmp(subj(i).misc.analysisType, 'C3_alphatheta')
-                subj(i).C3(subj(i).misc.C3Added).TF = x;
+                subj(i).C3(j).TF = x;
             elseif strcmp(subj(i).misc.analysisType, 'O1_alphatheta')
-                subj(i).O1(subj(i).misc.O1Added).TF = x;
+                subj(i).O1(j).TF = x;
             else % analysisType == cl_alpha3alpha2
                 subj(i).TFs(j) = x;   
             end
@@ -108,9 +108,9 @@ elseif strcmp(subj(i).misc.measure, 'TF')
         else % rejectBadFits, guiFit == false
             disp('TF is too low or too high. Choosing TF = 4.5 Hz');
             if strcmp(subj(i).misc.analysisType, 'C3_alphatheta')
-                subj(i).C3(subj(i).misc.C3Added).TF = 4.5;
+                subj(i).C3(j).TF = 4.5;
             elseif strcmp(subj(i).misc.analysisType, 'O1_alphatheta')
-                subj(i).O1(subj(i).misc.O1Added).TF = 4.5;
+                subj(i).O1(j).TF = 4.5;
             else
                 subj(i).TFs(j) = 4.5;
             end
@@ -118,9 +118,9 @@ elseif strcmp(subj(i).misc.measure, 'TF')
     else
         % Polynomial-derived TF is reasonable
         if strcmp(subj(i).misc.analysisType, 'C3_alphatheta')
-            subj(i).C3(subj(i).misc.C3Added).TF = freqs(ind);
+            subj(i).C3(j).TF = freqs(ind);
         elseif strcmp(subj(i).misc.analysisType, 'O1_alphatheta')
-            subj(i).O1(subj(i).misc.O1Added).TF = freqs(ind);
+            subj(i).O1(j).TF = freqs(ind);
         else
             subj(i).TFs(j) = freqs(ind);
         end

@@ -28,7 +28,7 @@
 % Algorithm:
 % 
 
-function subj = cl_alphatheta(importpath, exportpath, method, rejectBadFits, guiFit)
+function subj = cl_alphatheta(importpath, exportpath, rejectBadFits, guiFit)
 
 C3trodes = [11 15 17 20];
 O1trodes = [25 26 27];
@@ -45,10 +45,7 @@ if (~exist('exportpath', 'var'))
     if exportpath == 0
         error('Error: Please specify the folder to export the .set files to.');
     end
-end
     fprintf('Export path: %s\n', exportpath);
-if (~exist('method', 'var'))
-    method = 'default';
 end
 if (~exist('rejectBadFits', 'var'))
     rejectBadFits = false;
@@ -61,25 +58,25 @@ end
 fileID = fopen(strcat(pwd, '/', date, '-cl_alpha3alpha2-parameters.txt'), 'w');
 fprintf(fileID, 'importpath: %s\n', importpath)
 fprintf(fileID, 'exportpath: %s\n', exportpath)
-fprintf(fileID, 'method:     %s\n', method)
 fprintf(fileID, 'rejectBadFits: %s\n', rejectBadFits)
 fprintf(fileID, 'guiFit:     %s\n', guiFit)
 fclose(fileID)
 
+tic;
 % Create list of files and allocate necessary memory for the analysis
 files = dir(fullfile(strcat(importpath, '/*S.mat')));
 [Signal, SignalInfo, path] = nbt_load_file(strcat(importpath, '/', files(1).name));
-subj = cl_allocateSubj('cl_alphatheta', size(files,1), size(Signal,2), SignalInfo.original_sample_frequency);
-
+subj = cl_allocateSubj('cl_alphatheta', size(files,1), size(Signal,2), SignalInfo.original_sample_frequency, C3trodes, O1trodes);
 for i = 1:numel(files)
     [Signal, SignalInfo, path] = nbt_load_file(strcat(importpath, '/', files(i).name));
     subj(i).SubjectID = files(i).name(9:11);
     
-    % --------------------------------------------- %
-    % Calculate IAF, TF, and power for each channel %
-    % --------------------------------------------- %
-        
+    % ------------------------------------------------------- %
+    % Calculate IAF, TF, bands, and power for each C3 channel %
+    % ------------------------------------------------------- %
+    
     for j = 1:numel(C3trodes)
+        fprintf('---- SUBJECT %s: CHANNEL %d (C3) -----\n', subj(i).SubjectID, C3trodes(j));
         C3PeakFit = nbt_doPeakFit(Signal(:,C3trodes(j)), SignalInfo);
         subj(i).C3(j).Signal = Signal(:,C3trodes(j));
         if isnan(C3PeakFit.IAF) || C3PeakFit.IAF < 7 || C3PeakFit.IAF > 13
@@ -87,15 +84,18 @@ for i = 1:numel(files)
             subj(i).misc.analysisType = 'C3_alphatheta';
             subj = cl_correctBadFits(subj, C3PeakFit, Signal, i, j, rejectBadFits, guiFit);
         else
-            subj(i).C3(j).TF = C3PeakFit.TF;
+            subj(i).C3(j).IAF = C3PeakFit.IAF;
         end
         if isnan(C3PeakFit.TF) || C3PeakFit.TF < 4 || C3PeakFit.TF > 7
             subj(i).misc.measure = 'TF';
             subj(i).misc.analysisType = 'C3_alphatheta';
-            subj(i).C3(j).TF = C3PeakFit.TF;
+            subj = cl_correctBadFits(subj, C3PeakFit, Signal, i, j, rejectBadFits, guiFit);
         else
-            subj(i).O1(j).TF = C3PeakFit.TF;
+            subj(i).C3(j).TF = C3PeakFit.TF;
         end
+        fprintf('IAF: %d\n', subj(i).C3(j).IAF);
+        fprintf('TF:  %d\n', subj(i).C3(j).TF);
+
         % Now calculate power for this electrode across all bands
         subj(i).C3(j).deltaFloor    = subj(i).C3(j).TF - 4;
         subj(i).C3(j).deltaCeiling  = subj(i).C3(j).TF - 2;
@@ -132,7 +132,13 @@ for i = 1:numel(files)
         subj(i).C3(j).C3AlphaThetaRatio_fixed = subj(i).C3(j).alphaPower_fixed / subj(i).C3(j).thetaPower_fixed;
         subj(i).C3(j).C3UpperLowAlphaRatio = subj(i).C3(j).alpha3Power / subj(i).C3(j).alpha3Power;
     end
+
+    % ------------------------------------------------------- %
+    % Calculate IAF, TF, bands, and power for each O1 channel %
+    % ------------------------------------------------------- %
+
     for j = 1:numel(O1trodes)
+        fprintf('---- SUBJECT %s: CHANNEL %d (O1) -----\n', subj(i).SubjectID, O1trodes(j));
         O1PeakFit = nbt_doPeakFit(Signal(:,O1trodes(j)), SignalInfo);
         subj(i).O1(j).Signal = Signal(:,O1trodes(j));
         if isnan(O1PeakFit.IAF) || O1PeakFit.IAF < 7 || O1PeakFit.IAF > 13
@@ -140,15 +146,18 @@ for i = 1:numel(files)
             subj(i).misc.analysisType = 'O1_alphatheta';
             subj = cl_correctBadFits(subj, O1PeakFit, Signal, i, j, rejectBadFits, guiFit);
         else
-            subj(i).O1(j).TF = O1PeakFit.TF;
+            subj(i).O1(j).IAF = O1PeakFit.IAF;
         end
         if isnan(O1PeakFit.TF) || O1PeakFit.TF < 4 || O1PeakFit.TF > 7
             subj(i).misc.measure = 'TF';
             subj(i).misc.analysisType = 'O1_alphatheta';
-            subj(i).O1(j).TF = O1PeakFit.TF;
+            subj = cl_correctBadFits(subj, O1PeakFit, Signal, i, j, rejectBadFits, guiFit);
         else
             subj(i).O1(j).TF = O1PeakFit.TF;
         end
+        fprintf('IAF: %d\n', subj(i).O1(j).IAF);
+        fprintf('TF:  %d\n', subj(i).O1(j).TF);
+        
         % Now calculate power for this electrode across all bands
         subj(i).O1(j).deltaFloor    = subj(i).O1(j).TF - 4;
         subj(i).O1(j).deltaCeiling  = subj(i).O1(j).TF - 2;
@@ -186,42 +195,68 @@ for i = 1:numel(files)
         subj(i).O1(j).O1UpperLowAlphaRatio = subj(i).O1(j).alpha3Power / subj(i).O1(j).alpha3Power;
     end
 
-    % -------------------------------------------------------------- %
-    % Average power calculations to get power across frequency bands %
-    % -------------------------------------------------------------- %
-    
-    subj(i).C3meanTF  = nanmean(subj(i).C3.TF);
-    subj(i).C3meanIAF = nanmean(subj(i).C3.IAF);
-    subj(i).O1meanTF  = nanmean(subj(i).O1(:).TF);
-    subj(i).O1meanIAF = nanmean(subj(i).O1(:).IAF);
+    % --------------------------------------------------------------------------- %
+    % Average power calculations across all channels to get overall for C3 and O1 %
+    % --------------------------------------------------------------------------- %
 
-    subj(i).C3deltaPower  = nanmean(subj(i).C3(:).deltaPower);
-    subj(i).C3thetaPower  = nanmean(subj(i).C3(:).thetaPower);
-    subj(i).C3alphaPower  = nanmean(subj(i).C3(:).alphaPower);
-    subj(i).C3alpha1Power = nanmean(subj(i).C3(:).alpha1Power);
-    subj(i).C3alpha2Power = nanmean(subj(i).C3(:).alpha2Power);
-    subj(i).C3alpha3Power = nanmean(subj(i).C3(:).alpha3Power);
+    subj(i).C3meanTF  = nanmean([subj(i).C3(:).TF]);
+    subj(i).C3meanIAF = nanmean([subj(i).C3(:).IAF]);
+    subj(i).O1meanTF  = nanmean([subj(i).O1(:).TF]);
+    subj(i).O1meanIAF = nanmean([subj(i).O1(:).IAF]);
 
-    subj(i).O1deltaPower  = nanmean(subj(i).O1(:).deltaPower);
-    subj(i).O1thetaPower  = nanmean(subj(i).O1(:).thetaPower);
-    subj(i).O1alphaPower  = nanmean(subj(i).O1(:).alphaPower);
-    subj(i).O1alpha1Power = nanmean(subj(i).O1(:).alpha1Power);
-    subj(i).O1alpha2Power = nanmean(subj(i).O1(:).alpha2Power);
-    subj(i).O1alpha3Power = nanmean(subj(i).O1(:).alpha3Power);
+    subj(i).C3deltaFloor    = nanmean([subj(i).C3(:).deltaFloor])
+    subj(i).C3deltaCeiling  = nanmean([subj(i).C3(:).deltaCeiling])
+    subj(i).C3thetaFloor    = nanmean([subj(i).C3(:).thetaFloor])
+    subj(i).C3thetaCeiling  = nanmean([subj(i).C3(:).thetaCeiling])
+    subj(i).C3alphaFloor    = nanmean([subj(i).C3(:).alphaFloor])
+    subj(i).C3alpha1Floor   = nanmean([subj(i).C3(:).alpha1Floor])
+    subj(i).C3alpha1Ceiling = nanmean([subj(i).C3(:).alpha1Ceiling])
+    subj(i).C3alpha2Floor   = nanmean([subj(i).C3(:).alpha2Floor])
+    subj(i).C3alpha2Ceiling = nanmean([subj(i).C3(:).alpha2Ceiling])
+    subj(i).C3alpha3Floor   = nanmean([subj(i).C3(:).alpha3Floor])
+    subj(i).C3alpha3Ceiling = nanmean([subj(i).C3(:).alpha3Ceiling])
+    subj(i).C3alphaCeiling  = nanmean([subj(i).C3(:).alphaCeiling])
 
-    subj(i).C3deltaPower_fixed  = nanmean(subj(i).C3(:).deltaPower_fixed);
-    subj(i).C3thetaPower_fixed  = nanmean(subj(i).C3(:).thetaPower_fixed);
-    subj(i).C3alphaPower_fixed  = nanmean(subj(i).C3(:).alphaPower_fixed);
-    subj(i).C3alpha1Power_fixed = nanmean(subj(i).C3(:).alpha1Power_fixed);
-    subj(i).C3alpha2Power_fixed = nanmean(subj(i).C3(:).alpha2Power_fixed);
-    subj(i).C3alpha3Power_fixed = nanmean(subj(i).C3(:).alpha3Power_fixed);
+    subj(i).O1deltaFloor    = nanmean([subj(i).O1(:).deltaFloor])
+    subj(i).O1deltaCeiling  = nanmean([subj(i).O1(:).deltaCeiling])
+    subj(i).O1thetaFloor    = nanmean([subj(i).O1(:).thetaFloor])
+    subj(i).O1thetaCeiling  = nanmean([subj(i).O1(:).thetaCeiling])
+    subj(i).O1alphaFloor    = nanmean([subj(i).O1(:).alphaFloor])
+    subj(i).O1alpha1Floor   = nanmean([subj(i).O1(:).alpha1Floor])
+    subj(i).O1alpha1Ceiling = nanmean([subj(i).O1(:).alpha1Ceiling])
+    subj(i).O1alpha2Floor   = nanmean([subj(i).O1(:).alpha2Floor])
+    subj(i).O1alpha2Ceiling = nanmean([subj(i).O1(:).alpha2Ceiling])
+    subj(i).O1alpha3Floor   = nanmean([subj(i).O1(:).alpha3Floor])
+    subj(i).O1alpha3Ceiling = nanmean([subj(i).O1(:).alpha3Ceiling])
+    subj(i).O1alphaCeiling  = nanmean([subj(i).O1(:).alphaCeiling])
 
-    subj(i).O1deltaPower_fixed  = nanmean(subj(i).O1(:).deltaPower_fixed);
-    subj(i).O1thetaPower_fixed  = nanmean(subj(i).O1(:).thetaPower_fixed);
-    subj(i).O1alphaPower_fixed  = nanmean(subj(i).O1(:).alphaPower_fixed);
-    subj(i).O1alpha1Power_fixed = nanmean(subj(i).O1(:).alpha1Power_fixed);
-    subj(i).O1alpha2Power_fixed = nanmean(subj(i).O1(:).alpha2Power_fixed);
-    subj(i).O1alpha3Power_fixed = nanmean(subj(i).O1(:).alpha3Power_fixed);
+    subj(i).C3deltaPower  = nanmean([subj(i).C3(:).deltaPower]);
+    subj(i).C3thetaPower  = nanmean([subj(i).C3(:).thetaPower]);
+    subj(i).C3alphaPower  = nanmean([subj(i).C3(:).alphaPower]);
+    subj(i).C3alpha1Power = nanmean([subj(i).C3(:).alpha1Power]);
+    subj(i).C3alpha2Power = nanmean([subj(i).C3(:).alpha2Power]);
+    subj(i).C3alpha3Power = nanmean([subj(i).C3(:).alpha3Power]);
+
+    subj(i).O1deltaPower  = nanmean([subj(i).O1(:).deltaPower]);
+    subj(i).O1thetaPower  = nanmean([subj(i).O1(:).thetaPower]);
+    subj(i).O1alphaPower  = nanmean([subj(i).O1(:).alphaPower]);
+    subj(i).O1alpha1Power = nanmean([subj(i).O1(:).alpha1Power]);
+    subj(i).O1alpha2Power = nanmean([subj(i).O1(:).alpha2Power]);
+    subj(i).O1alpha3Power = nanmean([subj(i).O1(:).alpha3Power]);
+
+    subj(i).C3deltaPower_fixed  = nanmean([subj(i).C3(:).deltaPower_fixed]);
+    subj(i).C3thetaPower_fixed  = nanmean([subj(i).C3(:).thetaPower_fixed]);
+    subj(i).C3alphaPower_fixed  = nanmean([subj(i).C3(:).alphaPower_fixed]);
+    subj(i).C3alpha1Power_fixed = nanmean([subj(i).C3(:).alpha1Power_fixed]);
+    subj(i).C3alpha2Power_fixed = nanmean([subj(i).C3(:).alpha2Power_fixed]);
+    subj(i).C3alpha3Power_fixed = nanmean([subj(i).C3(:).alpha3Power_fixed]);
+
+    subj(i).O1deltaPower_fixed  = nanmean([subj(i).O1(:).deltaPower_fixed]);
+    subj(i).O1thetaPower_fixed  = nanmean([subj(i).O1(:).thetaPower_fixed]);
+    subj(i).O1alphaPower_fixed  = nanmean([subj(i).O1(:).alphaPower_fixed]);
+    subj(i).O1alpha1Power_fixed = nanmean([subj(i).O1(:).alpha1Power_fixed]);
+    subj(i).O1alpha2Power_fixed = nanmean([subj(i).O1(:).alpha2Power_fixed]);
+    subj(i).O1alpha3Power_fixed = nanmean([subj(i).O1(:).alpha3Power_fixed]);
 
     % ---------------------- %
     % Calculate power ratios %
@@ -229,20 +264,20 @@ for i = 1:numel(files)
     
     subj(i).C3AlphaThetaRatio = subj(i).C3alphaPower / subj(i).C3thetaPower;
     subj(i).O1AlphaThetaRatio = subj(i).O1alphaPower / subj(i).O1thetaPower;
-    subj(i).C3AlphaThetaRatio_fixed = subj(i).C3alphaPower_fixed / subj(i).C3alphaPower_fixed;
-    subj(i).O1AlphaThetaRatio_fixed = subj(i).O1alphaPower_fixed / subj(i).O1alphaPower_fixed;
-    subj(i).C3UpperLowAlphaRatio = subj(i).C3alpha3Power / subj(i).C3alpha3Power;
-    subj(i).O1UpperLowAlphaRatio = subj(i).O1alpha3Power / subj(i).O1alpha3Power;
+    subj(i).C3AlphaThetaRatio_fixed = subj(i).C3alphaPower_fixed / subj(i).C3thetaPower_fixed;
+    subj(i).O1AlphaThetaRatio_fixed = subj(i).O1alphaPower_fixed / subj(i).O1thetaPower_fixed;
+    subj(i).C3UpperLowAlphaRatio = subj(i).C3alpha3Power / subj(i).C3alpha2Power;
+    subj(i).O1UpperLowAlphaRatio = subj(i).O1alpha3Power / subj(i).O1alpha2Power;
 
-    subj(i).avgC3AlphaThetaRatio = nanmean(subj(i).C3(:).C3AlphaThetaRatio);
-    subj(i).avgO1AlphaThetaRatio = nanmean(subj(i).O1(:).O1AlphaThetaRatio);
-    subj(i).avgC3AlphaThetaRatio_fixed = nanmean(subj(i).C3(:).C3AlphaThetaRatio_fixed);
-    subj(i).avgO1AlphaThetaRatio_fixed = nanmean(subj(i).O1(:).O1AlphaThetaRatio_fixed);
-    subj(i).avgC3UpperLowAlphaRatio = nanmean(subj(i).C3(:).C3UpperLowAlphaRatio);
-    subj(i).avgO1UpperLowAlphaRatio = nanmean(subj(i).O1(:).O1UpperLowAlphaRatio);
+    subj(i).avgC3AlphaThetaRatio = nanmean([subj(i).C3(:).C3AlphaThetaRatio]);
+    subj(i).avgO1AlphaThetaRatio = nanmean([subj(i).O1(:).O1AlphaThetaRatio]);
+    subj(i).avgC3AlphaThetaRatio_fixed = nanmean([subj(i).C3(:).C3AlphaThetaRatio_fixed]);
+    subj(i).avgO1AlphaThetaRatio_fixed = nanmean([subj(i).O1(:).O1AlphaThetaRatio_fixed]);
+    subj(i).avgC3UpperLowAlphaRatio = nanmean([subj(i).C3(:).C3UpperLowAlphaRatio]);
+    subj(i).avgO1UpperLowAlphaRatio = nanmean([subj(i).O1(:).O1UpperLowAlphaRatio]);
 end
 toc;
 structFile = strcat(exportpath, '/', date, '-cl_alphatheta.mat');
 save(structFile, 'subj');
-cl_processalphatheta(subj), exportpath);
+cl_processalphatheta(subj, exportpath);
 end
