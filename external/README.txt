@@ -1,4 +1,4 @@
-This folder used to contain modules external to EEGLAB
+This folder use to contain modules external to EEGLAB
 Now all external modules are treated as EEGLAB extensions
 and this folder is not longer needed.
 

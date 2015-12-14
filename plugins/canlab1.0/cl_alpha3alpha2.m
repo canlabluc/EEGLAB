@@ -106,14 +106,16 @@ for i = 1:numel(files)
         % traditional and individualized frequency bands.
         channelPeakObj = nbt_doPeakFit(Signal(:,j), SignalInfo);
         if isnan(channelPeakObj.IAF) || channelPeakObj.IAF < 7 || channelPeakObj.IAF > 13
-            subj = cl_correctBadFits(subj, 'IAF', 'cl_alpha3alpha2',...
-                 channelPeakObj, Signal, SignalInfo, i, j, rejectBadFits, guiFit);
+            subj(i).misc.measure = 'IAF';
+            subj(i).misc.analysisType = 'cl_alpha3alpha2';
+            subj = cl_correctBadFits(subj, channelPeakObj, Signal, i, j, rejectBadFits, guiFit);
         else
             subj(i).IAFs(j) = channelPeakObj.IAF;
         end
         if isnan(channelPeakObj.TF) || channelPeakObj.TF < 4 || channelPeakObj.TF > 7
-            subj = cl_correctBadFits(subj, 'TF', 'cl_alpha3alpha2',...
-                channelPeakObj, Signal, SignalInfo, i, j, rejectBadFits, guiFit);
+            subj(i).misc.measure = 'TF';
+            subj(i).misc.analysisType = 'cl_alpha3alpha2';
+            subj = cl_correctBadFits(subj, channelPeakObj, Signal, i, j, rejectBadFits, guiFit);
         else
             subj(i).TFs(j) = channelPeakObj.TF;
         end

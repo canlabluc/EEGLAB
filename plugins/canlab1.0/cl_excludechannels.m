@@ -54,7 +54,11 @@ files = dir(fullfile(strcat(importpath, '/*.set')));
 for id = 1:numel(files)
     EEG = pop_loadset(files(id).name, importpath);
     % Now we remove selected data channels from all of the datasets.
-    EEG = pop_select(EEG, 'nochannel', extClinicalCh);
+    if strcmp(montage, 'extClinicalCh')
+        EEG = pop_select(EEG, 'nochannel', extClinicalCh);
+    elseif strcmp(montage, 'stdClinicalCh')
+        EEG = pop_select(EEG, 'nochannel', stdClinicalCh);
+    end
     pop_saveset(EEG, 'filename', files(id).name(1:end-4), 'filepath',...
-        exportpath, 'savemode', 'onefile');
+                exportpath, 'savemode', 'onefile');
 end
