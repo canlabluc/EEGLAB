@@ -6,32 +6,32 @@
 %   >>> subj = cl_alpha3alpha2(importpath, exportpath);
 %   >>> subj = cl_alpha3alpha2(importpath, exportpath, rejectBadFits = true,...
 %                                                      guiFit        = false);
-% 
+%
 % Inputs:
 % importpath: A string which specifies the directory containing the .cnt files
 %             that are to be imported
-% 
+%
 % exportpath: A string which specifies the directory containing the .set files
 %             that are to be saved for further analysis
-% 
+%
 % rejectBadFits: Boolean that defaults to false. In the case that the IAF or TF
 %                derived from fitting the polynomial to the power spectrum fail
-%                to be reasonable, setting this parameter to true will result 
+%                to be reasonable, setting this parameter to true will result
 %                in the program ignoring that value from further analysis.
-%                
+%
 % guiFit: Boolean that defaults to false. Allows the user to select TF, IAF
 %         values in the case that the polynomial fit fails to find reasonable
 %         IAFs or TFs.
-% 
+%
 % Outputs:
 % subj: An array of structures, one for each subject that is processed. The
 %       structure contains all of the results of the analysis.
-% 
+%
 % Notes:
 % Note that since spectopo() returns the Power Spectrum Density in units of
 % 10*log10(uV^2), we need to apply a few transformations to acquire uV^2,
 % or absolute power.
-% 
+%
 % Algorithm:
 % For each subject:
 % 1. Calculate the IAF and TF for each channel using nbt_doPeakFit from the NBT
@@ -40,19 +40,19 @@
 %          a 15th order polynomial to the power spectrum. The local minimum in
 %          the 0 - 7 Hz range is chosen as the TF, and the local maximum in the
 %          7 - 13 Hz range is chosen as the IAF.
-%               i. If the IAF or TF still fails to be reasonable (e.g., the 
-%                  spectrum is very flat and results in TF values that are 
+%               i. If the IAF or TF still fails to be reasonable (e.g., the
+%                  spectrum is very flat and results in TF values that are
 %                  either 7 Gz or 0 Hz), we reject these values and move on.
-%               ii. Alternatively, if guiFit is set to true, the user is 
+%               ii. Alternatively, if guiFit is set to true, the user is
 %                   allowed to visually select the TF or IAF.
 % 2. Calculate power across individualized and traditional frequency
-%          bands for that channel. 
-% 3. Calculate fixed and individualized alpha3/alpha2 and alpha/theta 
+%          bands for that channel.
+% 3. Calculate fixed and individualized alpha3/alpha2 and alpha/theta
 %          power ratios for that channel.
 % 4. The overall nanmean power for each band is the average power for that band
-%    across all channels. 
+%    across all channels.
 
-function subj = cl_alpha3alpha2(importpath, exportpath, method, rejectBadFits, guiFit)
+function subj = cl_alpha3alpha2(importpath, exportpath, rejectBadFits, guiFit)
 
 if (~exist('importpath', 'var'))
     importpath = uigetdir('~', 'Select folder to import .cnt files from');
@@ -64,12 +64,9 @@ end
 if (~exist('exportpath', 'var'))
     exportpath   = uigetdir('~', 'Select folder to export .set files to');
     if exportpath == 0
-        error('Error: Please specify the folder to export the .set files to.');
+        error('Error: Please specify the folder to export results to.');
     end
     fprintf('Export path: %s\n', exportpath);
-end
-if (~exist('method', 'var'))
-    method = 'default';
 end
 if (~exist('rejectBadFits', 'var'))
     rejectBadFits = false;
@@ -82,7 +79,6 @@ end
 fileID = fopen(strcat(pwd, '/', date, '-cl_alpha3alpha2-parameters.txt'), 'w');
 fprintf(fileID, 'importpath: %s\n', importpath)
 fprintf(fileID, 'exportpath: %s\n', exportpath)
-fprintf(fileID, 'method:     %s\n', method)
 fprintf(fileID, 'rejectBadFits: %s\n', rejectBadFits)
 fprintf(fileID, 'guiFit:     %s\n', guiFit)
 fclose(fileID)
@@ -125,7 +121,7 @@ for i = 1:numel(files)
         % ----------------------------------------------------- %
         % Use IAF and TF to find individualized frequency bands %
         % ----------------------------------------------------- %
-        
+
         subj(i).ch_deltaFloor(j)    = subj(i).TFs(j) - 4;
         subj(i).ch_deltaCeiling(j)  = subj(i).TFs(j) - 2;
         subj(i).ch_thetaFloor(j)    = subj(i).TFs(j) - 2;
@@ -145,7 +141,7 @@ for i = 1:numel(files)
         % --------------- %
         % Calculate Power %
         % --------------- %
-        
+
         [PSD, Freqs] = spectopo(Signal(:,j)', 0, 512, 'plot', 'off');
         % subj(i).PSD(j) = PSD;
 
@@ -166,7 +162,7 @@ for i = 1:numel(files)
         subj(i).ch_alpha1Power(j) = calculatePower(PSD, Freqs, subj(i).TFs(j),            subj(i).ch_alpha2Floor(j));
         subj(i).ch_alpha2Power(j) = calculatePower(PSD, Freqs, subj(i).ch_alpha2Floor(j), subj(i).IAFs(j));
         subj(i).ch_alpha3Power(j) = calculatePower(PSD, Freqs, subj(i).IAFs(j),           subj(i).ch_alpha3Ceiling(j));
-        
+
         % Compute ratios using both fixed and calculated bands
         subj(i).chRatioAlpha32(j)    = subj(i).ch_alpha3Power(j) / subj(i).ch_alpha2Power(j);
         subj(i).chRatioAlphaTheta(j) = subj(i).ch_alphaPower(j) / subj(i).ch_thetaPower(j);
@@ -177,7 +173,7 @@ for i = 1:numel(files)
     % ------------------------------------- %
     % Calculate mean power for each subject %
     % ------------------------------------- %
-    
+
     subj(i).TF  = nanmean(subj(i).TFs);
     subj(i).IAF = nanmean(subj(i).IAFs);
 
@@ -193,7 +189,7 @@ for i = 1:numel(files)
     subj(i).alpha3Floor   = nanmean(subj(i).ch_alpha3Floor);
     subj(i).alpha3Ceiling = nanmean(subj(i).ch_alpha3Ceiling);
     subj(i).alphaCeiling  = nanmean(subj(i).ch_alphaCeiling);
-    
+
     subj(i).deltaPower_fixed  = nanmean(subj(i).ch_deltaPower_fixed);
     subj(i).thetaPower_fixed  = nanmean(subj(i).ch_thetaPower_fixed);
     subj(i).alphaPower_fixed  = nanmean(subj(i).ch_alphaPower_fixed);
