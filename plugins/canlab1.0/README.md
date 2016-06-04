@@ -7,34 +7,55 @@ The cl plugin was developed in order to perform two main analyses. Their impleme
 | [`cl_alphatheta.m`](https://github.com/canlabluc/EEGLAB/blob/master/plugins/canlab1.0/cl_alphatheta.m) | [Moretti et al. (2013)](http://www.frontiersin.org/Journal/DownloadFile.ashx?pdf=1&FileId=34165&articleId=65285&ContentTypeId=21&FileName=fnagi-05-00063.pdf&Version=1) |
 
 # General Pipeline
-The general pipeline for performing both analyses is shown below. Supposing that we start off with some unprocessed cnt files:
+The general pipeline for performing both analyses is shown below. Users can either use the `cl_pipeline.m` function or run through the pipeline manually. Supposing that we start off with some unprocessed cnt files:
 
-1. Import .cnt files and convert them to .set files for use in MATLAB.
+## Using `cl_pipeline`
+First we define the struct containing the parameters for cl_pipeline. We'll be calculating the upper / lower alpha ratio:
+```matlab
+>> % Define parameters for the pipeline
+>> params.analysis = 'cl_alpha3alpha2';
+>> params.cntimport = true;
+>> params.samplerate = 512;
+>> params.lowerfreq = 0.5;
+>> params.higherfreq = 45;
+>> params.chexclusion = 'stdClinicalCh';
+>> params.reference = 'CAR';
+>> params.rejectBadFits = false;
+>> params.guiFit = false;
+```
+
+Then,
+```matlab
+>> subj = cl_pipeline('~/data/raw-cnt-files/', '~/sample_project/', params)
+```
+
+## Manually running through the pipeline
+Import .cnt files and convert them to .set files for use in MATLAB.
 ```matlab
 >> cl_importcnt('~/data/2015-05-01/raw_cnt_files/', '~/sample_project/raw_set_files/')
 ```
 
-2. Exclude channels. Currently there are two options: 'stdClinicalCh' and 'extClinicalCh'. See `cl_excludechannels.m` for more detail.
+Exclude channels. Currently there are two options: 'stdClinicalCh' and 'extClinicalCh'. See `cl_excludechannels.m` for more detail.
 ```matlab
 >> cl_excludechannels('~/sample_project/raw_set_files', '~/sample_project/excl_set/', 'stdClinicalCh')
 ```
 
-3. Apply a digital bandpass filter. We'll bandpass from 0.5 Hz to 45 Hz.
+Apply a digital bandpass filter. We'll bandpass from 0.5 Hz to 45 Hz.
 ```matlab
 >> cl_bandpassfilter('~/sample_project/excl_set', '~/sample_project/exclfilt_set', 0.5, 45)
 ```
 
-4. Re-reference the data to the common average.
+Re-reference the data to the common average.
 ```matlab
 >> cl_rereference('~/sample_project/exclfilt_set', '~/sample_project/exclfiltCAR_set')
 ```
 
-5. Convert file names to NBT nomenclature, so that we can utilize NBT's `nbt_doPeakFit` algorithm. This allows us to calculate individualized alpha and theta frequencies, as described in Moretti et al. (2013).
+Convert file names to NBT nomenclature, so that we can utilize NBT's `nbt_doPeakFit` algorithm. This allows us to calculate individualized alpha and theta frequencies, as described in Moretti et al. (2013).
 ```matlab
 >> cl_nbtfilenames('~/sample_project/exclfiltCAR_set', '~/sample_project/exclfiltCAR-NBT_mat')
 ```
 
-6. Now we perform the analysis, running either `cl_alphatheta` or `cl_alpha3alpha2`. Both will output a CSV to the specified export folder.
+Now we perform the analysis, running either `cl_alphatheta` or `cl_alpha3alpha2`. Both will output a CSV to the specified export folder.
 ```matlab
 >> cl_alpha3alpha2('~/sample_project/exclfiltCAR-NBT_mat', '~/sample_project/results/', rejectBadFits=false, guiFit=false)
 ```

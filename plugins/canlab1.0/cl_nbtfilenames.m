@@ -1,5 +1,5 @@
 % Change EEGLAB .set datasets from CANLab to NBT naming system. Note that these
-% end up being .mat files, since this is how NBt deals with data.
+% end up being .mat files, since this is how NBT deals with data.
 % 
 % Usage:
 %   >>> cl_nbtfilenames(); % GUI option
@@ -35,6 +35,8 @@ if (~exist('exportpath', 'var'))
 end
 
 files = dir(fullfile(strcat(importpath, '/*.set')));
+disp('Here come the files: ')
+disp(files)
 for id = 1:numel(files)
     study   = files(id).name(1:3);
     session = files(id).name(4:6);
@@ -43,6 +45,4 @@ for id = 1:numel(files)
     copyfile(strcat(importpath, '/', files(id).name), strcat(exportpath, ...
         sprintf('/%s%s.%s.yyyymmdd.RS.set', study, session, subject)));
 end
-disp('strcat(exportpath, /)):');
-disp(strcat(exportpath, '/'));
 nbt_import_files(strcat(exportpath, '/'), strcat(exportpath, '/'));
