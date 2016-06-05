@@ -61,6 +61,13 @@ if ~isfield(params, 'reference'),     error('params.reference not specified'),  
 if ~isfield(params, 'rejectBadFits'), error('params.rejectBadFits not specified'), end
 if ~isfield(params, 'guiFit'),        error('params.guiFit not specified'),        end
 
+% Write parameters to text file
+fileID = fopen(strcat(export, '/cl_pipeline-parameters-', date, '.txt'), 'w');
+fprintf(fileID, 'Import path: %s\n', importpath)
+fprintf(fileID, 'Export path: %s\n', exportpath)
+fprintf(fileID, 'Parameters:\n%s', evalc('disp(params)'))
+fclose(fileID)
+
 mkdir(strcat(exportpath, '/excl-set'));
 mkdir(strcat(exportpath, '/exclfilt-set'));
 mkdir(strcat(exportpath, '/exclfiltCAR-set'));

@@ -57,7 +57,8 @@ Convert file names to NBT nomenclature, so that we can utilize NBT's `nbt_doPeak
 
 Now we perform the analysis, running either `cl_alphatheta` or `cl_alpha3alpha2`. Both will output a CSV to the specified export folder.
 ```matlab
->> cl_alpha3alpha2('~/sample_project/exclfiltCAR-NBT_mat', '~/sample_project/results/', rejectBadFits=false, guiFit=false)
+>> cl_alpha3alpha2('~/sample_project/exclfiltCAR-NBT_mat', '~/sample_project/results/', rejectBadFits=false,...
+                                                                                        guiFit=false)
 ```
 
 `rejectBadFits`

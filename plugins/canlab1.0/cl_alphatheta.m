@@ -54,14 +54,6 @@ if (~exist('guiFit', 'var'))
     guiFit = false;
 end
 
-% Write settings to text file
-fileID = fopen(strcat(pwd, '/', date, '-cl_alpha3alpha2-parameters.txt'), 'w');
-fprintf(fileID, 'importpath: %s\n', importpath)
-fprintf(fileID, 'exportpath: %s\n', exportpath)
-fprintf(fileID, 'rejectBadFits: %s\n', rejectBadFits)
-fprintf(fileID, 'guiFit:     %s\n', guiFit)
-fclose(fileID)
-
 tic;
 % Create list of files and allocate necessary memory for the analysis
 files = dir(fullfile(strcat(importpath, '/*S.mat')));
