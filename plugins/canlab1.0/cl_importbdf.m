@@ -1,26 +1,25 @@
-% Converts .cnt files to EEGLAB-usable .set files
+% Converts .bdf files to EEGLAB-usable .set files
 %
 % Usage:
-%   >>> cl_importcnt(); % Brings up menu which allows user specify directories
-%   >>> cl_importcnt(importpath, exportpath);
+%   >>> cl_importbdf(importpath, exportpath);
 %
 % Inputs:
-% importpath: A string which specifies the directory containing the .cnt files
+% importpath: A string which specifies the directory containing the .bdf files
 %             that are to be imported
 % 
 % exportpath: A string which specifies the directory containing the .set files
 %             that are to be saved for further analysis
 % 
 % Notes: 
-% cl_importcnt utilizes EEGLAB's pop_loadcnt() function to import files
-% from a directory specified by the user. Each dataset is added to the ALLEEG 
+% cl_importbdf utilizes EEGLAB's pop_biosig() function to import files from
+% a directory specified by the user. Each dataset is added to the ALLEEG
 % object, and saved as a .set file to another directory also specified by the
-% user.
+% user. 
 %
 % Default parameters passed to pop_loadcnt():
 %   'blockread', 1 
 
-function cl_importcnt(importpath, exportpath)
+function cl_importbdf(importpath, exportpath)
 
 if (~exist('importpath', 'var'))
     importpath = uigetdir('~', 'Select folder to import .cnt files from');
@@ -37,13 +36,34 @@ if (~exist('exportpath', 'var'))
     fprintf('Export path: %s\n', exportpath);
 end
 
-filelist = dir(fullfile(strcat(importpath, '/*.cnt')));
+filelist = dir(fullfile(strcat(importpath, '/*.bdf')));
 for i = 1:numel(filelist)
-    EEG = pop_loadcnt(strcat(importpath, '/', filelist(i).name), 'blockread', 1);
-    EEG.setname = filelist(i).name(1:9);
-    %EEG.comments = pop_comments( {'Original file: ', strcat(pwd, '/', filelist(i).name) } );
-    [ALLEEG, EEG, CURRENTSET] = eeg_store(ALLEEG, EEG);
-    EEG = pop_saveset( EEG, 'filename', filelist(i).name(1:9), 'filepath', exportpath, 'savemode', 'onefile' );
+	EEG = pop_biosig(strcat(importpath, '/', filelist(i).name), 'ref', [20 48], 'refoptions', {'keepref', 'off'});
+	EEG.setname = filelist(i).name(1:9);
+    for i = 1:size(EEG.data, 1)
+       EEG.data(i,:) = EEG.data(i,:) - EEG.data(i, 1); 
+    end
+	% [ALLEEG, EEG, CURRENTSET] = eeg_store(ALLEEG, EEG);
+	EEG = pop_saveset( EEG, 'filename', filelist(i).name(1:9), 'filepath', exportpath, 'savemode', 'onefile');
 end
+
 eeglab redraw
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

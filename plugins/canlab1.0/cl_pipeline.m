@@ -47,7 +47,8 @@ if (~exist('exportpath', 'var')) || strcmp(exportpath, '')
   end
   fprintf('Export path: %s\n', exportpath);
 end
-if (~isfield(params, 'analysis')) && (strcmp(params.analysis, 'cl_alpha3alpha2') || strcmp(params.analysis, 'cl_alphatheta'))
+if (~isfield(params, 'analysis')) &&... 
+   (strcmp(params.analysis, 'cl_alpha3alpha2') || strcmp(params.analysis, 'cl_alphatheta'))
   error('Error: params.analysis not specified or incorrect');
 end
 
@@ -62,7 +63,7 @@ if ~isfield(params, 'rejectBadFits'), error('params.rejectBadFits not specified'
 if ~isfield(params, 'guiFit'),        error('params.guiFit not specified'),        end
 
 % Write parameters to text file
-fileID = fopen(strcat(export, '/cl_pipeline-parameters-', date, '.txt'), 'w');
+fileID = fopen(strcat(exportpath, '/cl_pipeline-parameters-', date, '.txt'), 'w');
 fprintf(fileID, 'Import path: %s\n', importpath)
 fprintf(fileID, 'Export path: %s\n', exportpath)
 fprintf(fileID, 'Parameters:\n%s', evalc('disp(params)'))
