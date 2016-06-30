@@ -40,30 +40,12 @@ filelist = dir(fullfile(strcat(importpath, '/*.bdf')));
 for i = 1:numel(filelist)
 	EEG = pop_biosig(strcat(importpath, '/', filelist(i).name), 'ref', [20 48], 'refoptions', {'keepref', 'off'});
 	EEG.setname = filelist(i).name(1:9);
-    for i = 1:size(EEG.data, 1)
-       EEG.data(i,:) = EEG.data(i,:) - EEG.data(i, 1); 
+    for j = 1:size(EEG.data, 1)
+        EEG.data(j,:) = EEG.data(j,:) - EEG.data(j,1);
     end
 	% [ALLEEG, EEG, CURRENTSET] = eeg_store(ALLEEG, EEG);
-	EEG = pop_saveset( EEG, 'filename', filelist(i).name(1:9), 'filepath', exportpath, 'savemode', 'onefile');
+    EEG = pop_saveset( EEG, 'filename', filelist(i).name(1:9), 'filepath', exportpath, 'savemode', 'onefile');
 end
 
 eeglab redraw
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
