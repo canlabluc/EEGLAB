@@ -46,7 +46,7 @@ table{1,41} = 'fixedGamma_Floor';
 table{1,42} = 'Gamma_Ceiling';
 
 for i = 1:numel(subj)
-    table{i+1,1}  = subj(i).SubjectID(1:11);
+    table{i+1,1}  = subj(i).SubjectID;
     table{i+1,2}  = subj(i).TF;
     table{i+1,3}  = subj(i).IAF;
     table{i+1,4}  = subj(i).ratio_Alpha32;

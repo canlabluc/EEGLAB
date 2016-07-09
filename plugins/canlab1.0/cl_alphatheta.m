@@ -61,7 +61,7 @@ files = dir(fullfile(strcat(importpath, '/*S.mat')));
 subj = cl_allocateSubj('cl_alphatheta', size(files,1), size(Signal,2), SignalInfo.original_sample_frequency, C3trodes, O1trodes);
 for i = 1:numel(files)
     [Signal, SignalInfo, path] = nbt_load_file(strcat(importpath, '/', files(i).name));
-    subj(i).SubjectID = files(i).name(9:11);
+    subj(i).SubjectID = files(i).name(1:end-4);
     
     % ------------------------------------------------------- %
     % Calculate IAF, TF, bands, and power for each C3 channel %

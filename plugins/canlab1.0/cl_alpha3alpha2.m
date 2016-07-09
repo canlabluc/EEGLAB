@@ -86,7 +86,7 @@ subj = cl_allocateSubj('cl_alpha3alpha2', size(files,1), size(Signal,2), SignalI
 tic;
 for i = 1:numel(files)
     [Signal, SignalInfo] = nbt_load_file(strcat(importpath, '/', files(i).name));
-    subj(i).SubjectID = files(i).name;
+    subj(i).SubjectID = files(i).name(1:end-4);
     for j = 1:size(Signal, 2)
         fprintf('---- SUBJECT %s: CHANNEL %d -----\n', subj(i).SubjectID(9:11), j);
         % Here, we calculate the IAF, TF for each channel, derive individualized
