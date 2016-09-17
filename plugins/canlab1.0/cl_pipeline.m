@@ -1,8 +1,8 @@
 % Runs through the entire pipeline.
 %
 % Usage:
-%  >>> cl_pipeline(importpath, exportpath, params)
-%  >>> cl_pipeline('~/data/raw_set', '~/sample_project/results/', params)
+%  >> cl_pipeline(importpath, exportpath, params)
+%  >> cl_pipeline('~/data/raw_set', '~/sample_project/results/', params)
 %
 % Inputs:
 % importpath: A string which specifies the directory containing either .cnt or

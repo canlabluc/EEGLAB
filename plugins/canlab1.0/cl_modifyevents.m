@@ -1,8 +1,9 @@
-% Modifies EEGLAB's EEG
+% Modifies EEGLAB's EEG struct's events to instead hold events specified by EMSE
+% .evt's
 %
 % Usage: 
-%	>>> cl_modifyevents(importpath_set, importpath_evt, exportpath, segments);
-%   >>> cl_modifyevents('raw-set', 'raw-evt', '~/Desktop', {'Closed', 'Open'});
+%	>> cl_modifyevents(importpath_set, importpath_evt, exportpath, segments);
+%   >> cl_modifyevents('raw-set', 'raw-evt', '~/Desktop', {'Closed', 'Open'});
 %
 % Inputs:
 % importpath_set: Import path for EEGLAB .set files.

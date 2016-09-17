@@ -1,8 +1,8 @@
 % Converts .cnt files to EEGLAB-usable .set files
 %
 % Usage:
-%   >>> cl_importcnt(); % Brings up menu which allows user specify directories
-%   >>> cl_importcnt(importpath, exportpath);
+%   >> cl_importcnt(); % Brings up menu which allows user specify directories
+%   >> cl_importcnt(importpath, exportpath);
 %
 % Inputs:
 % importpath: A string which specifies the directory containing the .cnt files
@@ -108,13 +108,16 @@ chan(65).name = 'EXG1';
 chan(66).name = 'EXG2';
 
 for i = 1:numel(filelist)
+    disp(filelist(i).name);
     EEG = pop_loadcnt(strcat(importpath, '/', filelist(i).name), 'blockread', 1);
     EEG.setname = filelist(i).name(1:end-4);
+    if numel(EEG.chanlocs) > 66
+        EEG = pop_select(EEG, 'nochannel', [67 : numel(EEG.chanlocs)]);
+    end
     for j = 1:size(EEG.data, 1)
         EEG.chanlocs(j).labels = chan(j).name;
         EEG.chanlocs(j).urchan = j;
     end
     EEG = pop_saveset( EEG, 'filename', filelist(i).name(1:end-4), 'filepath', exportpath, 'savemode', 'onefile' );
 end
-eeglab redraw
 end

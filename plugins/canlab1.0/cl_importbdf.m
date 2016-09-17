@@ -1,7 +1,7 @@
 % Converts .bdf files to EEGLAB-usable .set files
 %
 % Usage:
-%   >>> cl_importbdf(importpath, exportpath);
+%   >> cl_importbdf(importpath, exportpath);
 %
 % Inputs:
 % importpath: A string which specifies the directory containing the .bdf files

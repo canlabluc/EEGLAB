@@ -2,8 +2,8 @@
 % using both traditional and individualized frequency bands.
 %
 % Usage:
-%   >>> subj = cl_alphatheta();     % GUI option
-%   >>> subj = cl_alphatheta(importpath, exportpath, rejectBadFits = true,...
+%   >> subj = cl_alphatheta();     % GUI option
+%   >> subj = cl_alphatheta(importpath, exportpath, rejectBadFits = true,...
 %                                                    guiFit        = false);
 % Inputs:
 % importpath: A string which specifies the directory containing the .cnt files

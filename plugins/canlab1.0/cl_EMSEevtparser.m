@@ -3,14 +3,14 @@
 % according to the EEGLAB method of organizing events. That is, the output
 % of this function can be directly fed to EEG.event, as such:
 %
-% 	>>> EEG.event = cl_evtparser(...);
+% 	>> EEG.event = cl_evtparser(...);
 %
 % NOTE: The function currently only handles segments, not individual port
 % codes.
 %
 % Usage:
-%   >>> events = cl_evtparser(filepath, segments)
-% 	>>> events = cl_evtparser('subject101.evt', {'Clean Closed', 'Clean Open'})
+%   >> events = cl_evtparser(filepath, segments)
+% 	>> events = cl_evtparser('subject101.evt', {'Clean Closed', 'Clean Open'})
 % 
 % Inputs:
 % filepath: Path to the .evt file we're processing.
@@ -24,7 +24,7 @@
 %         cl_evtparser appends either '1' or '2' to the end of the event, for
 %         start and stop, respectively. 
 %
-% >>> cl_evtparser(...);
+% >> cl_evtparser(...);
 % 1x56 struct array with fields:
 %   type
 %   latency

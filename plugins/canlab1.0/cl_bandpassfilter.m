@@ -1,8 +1,7 @@
 % Applies a bandpass filter
 %
 % Usage:
-%   >>> cl_bandpassfilter();
-%   >>> cl_bandpassfilter(importpath, exportpath, lowerFreq, higherFreq);
+%   >> cl_bandpassfilter(importpath, exportpath, lowerFreq, higherFreq);
 %
 % Inputs:
 % importpath: A string which specifies the directory containing the EEG datasets

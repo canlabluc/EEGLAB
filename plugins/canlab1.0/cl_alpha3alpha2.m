@@ -2,9 +2,9 @@
 % fixed ones. Utilizes nbt_doPeakFit() and EEGLAB's spectopo() function.
 %
 % Usage:
-%   >>> subj = cl_alpha3alpha2();   % GUI option
-%   >>> subj = cl_alpha3alpha2(importpath, exportpath);
-%   >>> subj = cl_alpha3alpha2(importpath, exportpath, rejectBadFits = true,...
+%   >> subj = cl_alpha3alpha2();   % GUI option
+%   >> subj = cl_alpha3alpha2(importpath, exportpath);
+%   >> subj = cl_alpha3alpha2(importpath, exportpath, rejectBadFits = true,...
 %                                                      guiFit        = false);
 %
 % Inputs:

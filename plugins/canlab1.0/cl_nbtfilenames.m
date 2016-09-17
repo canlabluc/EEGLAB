@@ -2,8 +2,8 @@
 % end up being .mat files, since this is how NBT deals with data.
 % 
 % Usage:
-%   >>> cl_nbtfilenames(); % GUI option
-%   >>> cl_nbtfilenames(importpath, exportpath);
+%   >> cl_nbtfilenames(); % GUI option
+%   >> cl_nbtfilenames(importpath, exportpath);
 % 
 % Inputs:
 % importpath: A string which specifies the directory containing the .cnt files

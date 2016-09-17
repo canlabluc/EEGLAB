@@ -1,4 +1,22 @@
-% TODO: Documentation for this function
+% Computes specified channel clusters and adds them to the EEG object. Clusters
+% are computed by averaging channels.
+%
+% Usage:
+%   >> cl_clusters(importpath, exportpath, preset_cluster, cluster)
+%   >> cl_clusters('../data/', 'clut-set', '10-20-dense')
+% 
+% Inputs:
+% importpath: A string which specifies the directory containing the EEG datasets
+% to be re-referenced
+% 
+% exportpath: A string which specifies the directory in which to save the EEG
+% datasets which have had clusters added
+%
+% preset_cluster: A string which allows the user to specify one of the preset
+% clusters. Current options: '10-20-dense', '10-20-sparse', or 'custom'
+%
+% cluster: A cell which contains a list of channels with which to construct a
+% cluster. preset_cluster must be set to 'custom'
 
 function cl_clusters(importpath, exportpath, preset_cluster, cluster)
 

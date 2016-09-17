@@ -1,8 +1,8 @@
 % Changes sample frequency for a batch of .set files
 %
 % Usage:
-%   >>> subj = cl_alphatheta();    % GUI option 
-%   >>> subj = cl_alphatheta(importpath, exportpath);
+%   >> subj = cl_alphatheta();    % GUI option 
+%   >> subj = cl_alphatheta(importpath, exportpath);
 % 
 % Inputs:
 % importpath: A string which specifies the directory containing the .cnt files

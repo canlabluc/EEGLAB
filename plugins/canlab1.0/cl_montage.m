@@ -1,8 +1,8 @@
-% Handles both exclusion and clustering of EEG channels.
+% Handles exclusion of EEG channels to achieve certain montages.
 %
 % Usage:
-%   >>> cl_montage(importpath, exportpath, params);
-%   >>> cl_montage('raw-set', 'excl-set', params);
+%   >> cl_montage(importpath, exportpath, params);
+%   >> cl_montage('raw-set', 'excl-set', params);
 %
 % Inputs:
 % importpath: A string which specifies the directory containing the EEG datasets
@@ -11,35 +11,15 @@
 % exportpath: A string which specifies the directory containing the .set files
 % that are to be saved for further analysis.
 %
-% params: A struct that contains the parameters necessary to run cl_montage().
-%         params contains the following fields:
-%   montage: string, either:
-%       - 'stdClinicalCh': Exclude all channels except those that make up the
-%                          Standard Clinical Montage, composed of 19 channels
-%       - 'extClinicalCh': Exclude only the following channels: electrodes that
-%                          monitor eye activity, mastoid (reference electodes),
-%                          and electrodes that fall further down the head than
-%                          what the standard clinical montage uses. We thus get
-%                          a montage similar to the standard clinical one -- the
-%                          difference being that this one is denser.
-%   preset_cluster: string, either: 
-%       - 'custom':        Allows user to specify custom clusters.
-%       - '10-20-dense':   Constructs 5 clusters based on the 10-20 Intl. System:
-%                          frontal, left temporal, right temporal, central, and 
-%                          occipital areas.
-%   cluster: struct array, with the fields:
-%       - name:            String, name of cluster
-%       - electrodes:      Cell, contains names of electrodes to be used for
-%                          computed this cluster.
-% 
-% As an example, acquiring files with the extended clinical montage and with the
-% 10-20 system frontal, left and right temporal, central and occipital clusters
-% is done as such:
-%
-%   >>> params.preset_cluster = '10-20-dense';
-%   >>> params.montage = 'extClinicalCh';
-%   >>> cl_montage('raw-set', 'excl-set', params);
-%
+% montage: A string which specifies which montage to produce. Either:
+%	- 'stdClinicalCh': Exclude all channels except those that make up the
+%	                   Standard Clinical Montage, composed of 19 channels
+%	- 'extClinicalCh': Exclude only the following channels: electrodes that
+%	                   monitor eye activity, mastoid (reference electodes),
+%	                   and electrodes that fall further down the head than
+%	                   what the standard clinical montage uses. We thus get
+%	                   a montage similar to the standard clinical one -- the
+%	                   difference being that this one is denser.
 
 function cl_montage(importpath, exportpath, montage)
 
