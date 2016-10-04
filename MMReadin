@@ -1,0 +1,13 @@
+Proc Import Out= test1 datafile= "/home/ydesai20/UnicodeMM.xls"
+	DBMS=xls replace;
+	Sheet= "TestSheet1";
+	Getnames=yes;
+run;
+
+data test1edit; 
+	set	test1 (keep = subject session 
+	block appraisal appraisallist imagelist intensityratingrt
+	negative neutral positive valence valencelist);
+run;
+	
+Proc print data = test1edit noobs; 
