@@ -47,7 +47,7 @@ Apply a digital bandpass filter. We'll bandpass from 0.5 Hz to 45 Hz.
 
 Re-reference the data to the common average.
 ```matlab
->> cl_rereference('~/sample_project/exclfilt_set', '~/sample_project/exclfiltCAR_set')
+>> cl_rereference('~/sample_project/exclfilt_set', '~/sample_project/exclfiltCAR_set', 'CAR')
 ```
 
 Convert file names to NBT nomenclature, so that we can utilize NBT's `nbt_doPeakFit` algorithm. This allows us to calculate individualized alpha and theta frequencies, as described in Moretti et al. (2013).
