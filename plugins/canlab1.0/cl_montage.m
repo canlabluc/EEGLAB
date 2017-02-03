@@ -12,14 +12,14 @@
 % that are to be saved for further analysis.
 %
 % montage: A string which specifies which montage to produce. Either:
-%	- 'stdClinicalCh': Exclude all channels except those that make up the
-%	                   Standard Clinical Montage, composed of 19 channels
-%	- 'extClinicalCh': Exclude only the following channels: electrodes that
-%	                   monitor eye activity, mastoid (reference electodes),
-%	                   and electrodes that fall further down the head than
-%	                   what the standard clinical montage uses. We thus get
-%	                   a montage similar to the standard clinical one -- the
-%	                   difference being that this one is denser.
+% - 'stdClinicalCh': Exclude all channels except those that make up the
+%                    Standard Clinical Montage, composed of 19 channels
+% - 'extClinicalCh': Exclude only the following channels: electrodes that
+%                    monitor eye activity, mastoid (reference electodes),
+%                    and electrodes that fall further down the head than
+%                    what the standard clinical montage uses. We thus get
+%                    a montage similar to the standard clinical one -- the
+%                    difference being that this one is denser.
 
 function cl_montage(importpath, exportpath, montage)
 

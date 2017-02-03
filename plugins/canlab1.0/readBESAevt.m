@@ -31,7 +31,7 @@ fp = fopen(filename, 'r');
 if(fp >= 3)
     
     % Get the first line of the file. It looks something like that:
-    % Tmu         	Code	TriNo	Comnt
+    % Tmu           Code    TriNo   Comnt
     FirstLine = fgetl(fp);
     
     LineCounter = 1;

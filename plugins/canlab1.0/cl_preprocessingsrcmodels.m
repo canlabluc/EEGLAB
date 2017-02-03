@@ -2,50 +2,50 @@
 % preprocessing pipeline for the BESA-exported source models we use
 % to compute spectral slopes. Prior to running, change the parameters
 % below.
-% 
+%
 % Usage:
-% 	>> cl_preprocessingsrcmodels
+%   >> cl_preprocessingsrcmodels
 %
 % Parameters:
-%	importpath_mul: String, specifies the absolute path to the .mul source model 
-%                         files.
-% 
+%   importpath_mul: String, specifies the absolute path to the .mul source model
+%                           files.
+%
 % importpath_set: String, specifies the absolute path to the .set files which
-%								          contain the original, 66-channel full recordings.
+%                         contain the original, 66-channel full recordings.
 %
 % importpath_evt: String, specifies the absolute path to the .evt files which
-% 											  contain EMSE-exported event-related information, such
-%													as clean segments in the data.
+%                         contain EMSE-exported event-related information, such
+%                         as clean segments in the data.
 %
 % exportpath_set: String, specifies the absolute path to the .set files produced
-%													at the end of the preprocessing pipeline.
+%                         at the end of the preprocessing pipeline.
 %
 % exportpath_mat: String, specifies the absolute path to the .mat files produced
-%													at the end of the preprocessing pipeline, for importing
-%													into Python.
+%                         at the end of the preprocessing pipeline, for importing
+%                         into Python.
 %
 % montage: String, specifies the source model we're preprocessing. Options:
-%					 				 'dmn': For preprocessing the Default Mode Network souce model.
-%					 				 'frontal': For preprocessing the frontal source model.
-%					 				 'ventral': For preprocessing the ventral source model.
-%					         'dorsal': For preprocessing the dorsal source model.
+%                  'dmn': For preprocessing the Default Mode Network souce model.
+%                  'frontal': For preprocessing the frontal source model.
+%                  'ventral': For preprocessing the ventral source model.
+%                  'dorsal': For preprocessing the dorsal source model.
 %
 % segments: Cell, specifies the events to extract from the EMSE .evt files. For
-%						      resting state, this is usually {'C', 'O'}.
+%                 resting state, this is usually {'C', 'O'}.
 %
 % filter_lofreq: Scalar, specifies the lower bound of the bandpass filter.
 %
 % filter_hifreq: Scalar, specifies the upper bound of the bandpass filter.
 %
 % reference: String, specifies the reference we rereference to during preprocessing.
-%										 Only supported option is currently 'CAR' for the common average.
-%											
+%                    Only supported option is currently 'CAR' for the common average.
+%
 
-importpath_mul = 
-importpath_set = 
-importpath_evt = 
+importpath_mul =
+importpath_set =
+importpath_evt =
 
-exportpath_set = 
+exportpath_set =
 exportpath_mat =
 
 montage = 'frontal'

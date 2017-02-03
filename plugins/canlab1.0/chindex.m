@@ -1,8 +1,8 @@
 % Auxilliary function; returns index of specified channel
 %
 % Usage:
-%	>> idx = chindex(chanlocs, chan);
-% 	>> idx = chindex(EEG.chanlocs, 'A01');
+% >> idx = chindex(chanlocs, chan);
+%   >> idx = chindex(EEG.chanlocs, 'A01');
 %
 
 function index = chindex(chanlocs, chan)
@@ -15,6 +15,6 @@ for i = 1:numel(chanlocs)
     end
 end
 if index == -1
-	error('Channel not found in chanlocs.');
+    error('Channel not found in chanlocs.');
 end
 end

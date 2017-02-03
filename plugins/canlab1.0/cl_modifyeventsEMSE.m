@@ -2,7 +2,7 @@
 % .evt's
 %
 % Usage: 
-%	>> cl_modifyeventsEMSE(importpath_set, importpath_evt, exportpath, segments);
+% >> cl_modifyeventsEMSE(importpath_set, importpath_evt, exportpath, segments);
 % >> cl_modifyeventsEMSE('raw-set', 'raw-evt', '~/Desktop', {'Closed', 'Open'});
 %
 % Inputs:
@@ -20,9 +20,9 @@ function cl_modifyeventsEMSE(importpath_set, importpath_evt, exportpath, segment
 files_set = dir(strcat(importpath_set, '/*.set'));
 
 for i = 1:numel(files_set)
-	file = files_set(i).name(1:end-4);
-	EEG = pop_loadset(files_set(i).name, importpath_set);
-	EEG.event = cl_EMSEevtparser(strcat(importpath_evt, '/', file, '.evt'), segments);
-	name = files_set(i).name(1:end-4);
+    file = files_set(i).name(1:end-4);
+    EEG = pop_loadset(files_set(i).name, importpath_set);
+    EEG.event = cl_EMSEevtparser(strcat(importpath_evt, '/', file, '.evt'), segments);
+    name = files_set(i).name(1:end-4);
     pop_saveset(EEG, 'filename', name, 'filepath', exportpath, 'savemode', 'onefile');
 end

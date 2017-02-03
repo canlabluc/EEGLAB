@@ -1,7 +1,7 @@
 % Convert EEGLAB files to .mat for use in Python.
 %
 % Usage:
-% 	>> set_mat_converter(importpath, exportpath)
+%   >> set_mat_converter(importpath, exportpath)
 %
 
 function set_mat_converter(importpath, exportpath)
