@@ -45,12 +45,12 @@ for i = 1:numel(files_set)
         NoiseM1c = EEG.data(31:33, :);
         NoiseM2c = EEG.data(34:36, :);
 
-        PCC     = sqrt(sum(PCCc.^2,     1));
-        mPFC    = sqrt(sum(mPFCc.^2,    1));
-        LAG     = sqrt(sum(LAGc.^2,     1));
-        RAG     = sqrt(sum(RAGc.^2,     1));
-        LLatT   = sqrt(sum(LLatTc.^2,   1));
-        RLatT   = sqrt(sum(RLatTc.^2,   1));
+        PCC     = sqrt(sum(PCCc.^2, 1));
+        mPFC    = sqrt(sum(mPFCc.^2, 1));
+        LAG     = sqrt(sum(LAGc.^2, 1));
+        RAG     = sqrt(sum(RAGc.^2, 1));
+        LLatT   = sqrt(sum(LLatTc.^2, 1));
+        RLatT   = sqrt(sum(RLatTc.^2, 1));
         NoiseL1 = sqrt(sum(NoiseL1c.^2, 1));
         NoiseL2 = sqrt(sum(NoiseL2c.^2, 1));
         NoiseR1 = sqrt(sum(NoiseR1c.^2, 1));
@@ -95,19 +95,19 @@ for i = 1:numel(files_set)
         NoiseR2c = EEG.data(34:36, :);
         NoiseFc  = EEG.data(37:39, :);
 
-        LdlPFC  = sqrt(sum(LdlPFCc.^2,  1));
-        RdlPFC  = sqrt(sum(RdlPFCc.^2,  1));
-        LFront  = sqrt(sum(LFrontc.^2,  1));
-        RFront  = sqrt(sum(RFrontc.^2,  1));
-        LIPL    = sqrt(sum(LIPLc.^2,    1));
-        RIPL    = sqrt(sum(RIPLc.^2,    1));
-        LIPS    = sqrt(sum(LIPSc.^2,    1));
-        RIPS    = sqrt(sum(RIPSc.^2,    1));
+        LdlPFC  = sqrt(sum(LdlPFCc.^2, 1));
+        RdlPFC  = sqrt(sum(RdlPFCc.^2, 1));
+        LFront  = sqrt(sum(LFrontc.^2, 1));
+        RFront  = sqrt(sum(RFrontc.^2, 1));
+        LIPL    = sqrt(sum(LIPLc.^2, 1));
+        RIPL    = sqrt(sum(RIPLc.^2, 1));
+        LIPS    = sqrt(sum(LIPSc.^2, 1));
+        RIPS    = sqrt(sum(RIPSc.^2, 1));
         NoiseL1 = sqrt(sum(NoiseL1c.^2, 1));
         NoiseR1 = sqrt(sum(NoiseR1c.^2, 1));
         NoiseL2 = sqrt(sum(NoiseL2c.^2, 1));
         NoiseR2 = sqrt(sum(NoiseR2c.^2, 1));
-        NoiseF  = sqrt(sum(NoiseFc.^2,  1));
+        NoiseF  = sqrt(sum(NoiseFc.^2, 1));
         EEG.data = [
             LdlPFC  ; LdlPFCc;
             RdlPFC  ; RdlPFCc;
@@ -134,25 +134,25 @@ for i = 1:numel(files_set)
                   'Noise2R2','Noise2R3','NoiseF','NoiseF1','NoiseF2','NoiseF3'};
 
     elseif strcmp(montage, 'dorsal')
-        LFEFc  = EEG.data(1:3,   :);
-        RFEFc  = EEG.data(4:6,   :);
-        LaIPSc  = EEG.data(7:9,   :);
-        RaIPSc  = EEG.data(10:12, :);
-        LpIPSc    = EEG.data(13:15, :);
-        RpIPSc    = EEG.data(16:18, :);
-        Noise1Lc    = EEG.data(19:21, :);
-        Noise1Rc    = EEG.data(22:24, :);
-        Noise2Lc    = EEG.data(25:27, :);
-        Noise2Rc    = EEG.data(28:30, :);
-        Noise3Lc    = EEG.data(31:33, :);
-        Noise3Rc    = EEG.data(34:36, :);
+        LFEFc    = EEG.data(1:3,   :);
+        RFEFc    = EEG.data(4:6,   :);
+        LaIPSc   = EEG.data(7:9,   :);
+        RaIPSc   = EEG.data(10:12, :);
+        LpIPSc   = EEG.data(13:15, :);
+        RpIPSc   = EEG.data(16:18, :);
+        Noise1Lc = EEG.data(19:21, :);
+        Noise1Rc = EEG.data(22:24, :);
+        Noise2Lc = EEG.data(25:27, :);
+        Noise2Rc = EEG.data(28:30, :);
+        Noise3Lc = EEG.data(31:33, :);
+        Noise3Rc = EEG.data(34:36, :);
 
-        LFEF = sqrt(sum(LFEFc.^2, 1));
-        RFEF = sqrt(sum(RFEFc.^2, 1));
-        LaIPS = sqrt(sum(LaIPSc.^2, 1));
-        RaIPS = sqrt(sum(RaIPSc.^2, 1));
-        LpIPS = sqrt(sum(LpIPSc.^2, 1));
-        RpIPS = sqrt(sum(RpIPSc.^2, 1));
+        LFEF    = sqrt(sum(LFEFc.^2, 1));
+        RFEF    = sqrt(sum(RFEFc.^2, 1));
+        LaIPS   = sqrt(sum(LaIPSc.^2, 1));
+        RaIPS   = sqrt(sum(RaIPSc.^2, 1));
+        LpIPS   = sqrt(sum(LpIPSc.^2, 1));
+        RpIPS   = sqrt(sum(RpIPSc.^2, 1));
         Noise1L = sqrt(sum(Noise1Lc.^2, 1));
         Noise1R = sqrt(sum(Noise1Rc.^2, 1));
         Noise2L = sqrt(sum(Noise2Lc.^2, 1));
@@ -160,14 +160,14 @@ for i = 1:numel(files_set)
         Noise3L = sqrt(sum(Noise3Lc.^2, 1));
         Noise3R = sqrt(sum(Noise3Rc.^2, 1));
         EEG.data = [
-            LFEF  ; LFEFc;
-            RFEF  ; RFEFc;
-            LaIPS  ; LaIPSc;
-            RaIPS  ; RaIPSc;
-            LpIPS    ; LpIPSc;
-            RpIPS    ; RpIPSc;
-            Noise1L    ; Noise1Lc;
-            Noise1R    ; Noise1Rc;
+            LFEF    ; LFEFc;
+            RFEF    ; RFEFc;
+            LaIPS   ; LaIPSc;
+            RaIPS   ; RaIPSc;
+            LpIPS   ; LpIPSc;
+            RpIPS   ; RpIPSc;
+            Noise1L ; Noise1Lc;
+            Noise1R ; Noise1Rc;
             Noise2L ; Noise2Lc;
             Noise2R ; Noise2Rc;
             Noise3L ; Noise3Lc;
@@ -184,45 +184,44 @@ for i = 1:numel(files_set)
                   'Noise4R2','Noise4R3'};
 
     elseif strcmp(montage, 'ventral')
-        LIFGc  = EEG.data(1:3,   :);
-        RIFGc  = EEG.data(4:6,   :);
-        LMFGc  = EEG.data(7:9,   :);
-        RMFGc  = EEG.data(10:12, :);
-        LTPJc    = EEG.data(13:15, :);
-        RTPJc    = EEG.data(16:18, :);
-        LSTGc    = EEG.data(19:21, :);
-        RSTGc    = EEG.data(22:24, :);
-        NoiseLc    = EEG.data(25:27, :);
-        NoiseRc    = EEG.data(28:30, :);
-        NoiseFc    = EEG.data(31:33, :);
-        Noisec    = EEG.data(34:36, :);
+        LIFGc   = EEG.data(1:3,   :);
+        RIFGc   = EEG.data(4:6,   :);
+        LMFGc   = EEG.data(7:9,   :);
+        RMFGc   = EEG.data(10:12, :);
+        LTPJc   = EEG.data(13:15, :);
+        RTPJc   = EEG.data(16:18, :);
+        LSTGc   = EEG.data(19:21, :);
+        RSTGc   = EEG.data(22:24, :);
+        NoiseLc = EEG.data(25:27, :);
+        NoiseRc = EEG.data(28:30, :);
+        NoiseFc = EEG.data(31:33, :);
+        Noisec  = EEG.data(34:36, :);
 
-        LIFG = sqrt(sum(LIFGc.^2, 1));
-        RIFG = sqrt(sum(RIFGc.^2, 1));
-        LMFG = sqrt(sum(LMFGc.^2, 1));
-        RMFG = sqrt(sum(RMFGc.^2, 1));
-        LTPJ = sqrt(sum(LTPJc.^2, 1));
-        RTPJ = sqrt(sum(RTPJc.^2, 1));
-        LSTG = sqrt(sum(LSTGc.^2, 1));
-        RSTG = sqrt(sum(RSTGc.^2, 1));
+        LIFG   = sqrt(sum(LIFGc.^2, 1));
+        RIFG   = sqrt(sum(RIFGc.^2, 1));
+        LMFG   = sqrt(sum(LMFGc.^2, 1));
+        RMFG   = sqrt(sum(RMFGc.^2, 1));
+        LTPJ   = sqrt(sum(LTPJc.^2, 1));
+        RTPJ   = sqrt(sum(RTPJc.^2, 1));
+        LSTG   = sqrt(sum(LSTGc.^2, 1));
+        RSTG   = sqrt(sum(RSTGc.^2, 1));
         NoiseL = sqrt(sum(NoiseLc.^2, 1));
         NoiseR = sqrt(sum(NoiseRc.^2, 1));
         NoiseF = sqrt(sum(NoiseFc.^2, 1));
-        Noise = sqrt(sum(Noisec.^2, 1));
-
+        Noise  = sqrt(sum(Noisec.^2, 1));
         EEG.data = [
-            LIFG  ; LIFGc;
-            RIFG  ; RIFGc;
-            LMFG  ; LMFGc;
-            RMFG  ; RMFGc;
-            LTPJ    ; LTPJc;
-            RTPJ    ; RTPJc;
-            LSTG    ; LSTGc;
-            RSTG    ; RSTGc;
+            LIFG   ; LIFGc;
+            RIFG   ; RIFGc;
+            LMFG   ; LMFGc;
+            RMFG   ; RMFGc;
+            LTPJ   ; LTPJc;
+            RTPJ   ; RTPJc;
+            LSTG   ; LSTGc;
+            RSTG   ; RSTGc;
             NoiseL ; NoiseLc;
             NoiseR ; NoiseRc;
             NoiseF ; NoiseFc;
-            Noise ; Noisec;
+            Noise  ; Noisec;
         ];
 
         labels = {'LIFG','LIFGr','LIFGv','LIFGh','RIFG','RIFGr','RIFGv','RIFGh',...
