@@ -4,7 +4,7 @@ The cl plugin was developed in order to perform two main analyses. Their impleme
 | Algorithm Implementation | Paper |
 | -------------------------|-------|
 | [`cl_alpha3alpha2.m`](https://github.com/canlabluc/EEGLAB/blob/master/plugins/canlab1.0/cl_alpha3alpha2.m) | [Moretti et al. (2013)](http://www.frontiersin.org/Journal/DownloadFile.ashx?pdf=1&FileId=34165&articleId=65285&ContentTypeId=21&FileName=fnagi-05-00063.pdf&Version=1) |
-| [`cl_alphatheta.m`](https://github.com/canlabluc/EEGLAB/blob/master/plguins/canlab1.0/cl_alphatheta.m) | [Schmidt et al. (2013)](https://www.researchgate.net/profile/Antonio_Nardi/publication/257839823_Index_of_AlphaTheta_Ratio_of_the_Electroencephalogram_A_New_Marker_for_Alzheimers_Disease/links/004635314bb865df72000000.pdf) |
+| [`cl_alphatheta.m`](https://github.com/canlabluc/EEGLAB/blob/master/plugins/canlab1.0/cl_alphatheta.m) | [Schmidt et al. (2013)](https://www.researchgate.net/profile/Antonio_Nardi/publication/257839823_Index_of_AlphaTheta_Ratio_of_the_Electroencephalogram_A_New_Marker_for_Alzheimers_Disease/links/004635314bb865df72000000.pdf) |
 
 # General Pipeline
 The general pipeline for performing both analyses is shown below. Users can either use the `cl_pipeline.m` function or run through the pipeline manually. Supposing that we start off with some unprocessed cnt files:
