@@ -5,9 +5,6 @@
 %
 %   >> EEG.event = cl_evtparser(...);
 %
-% NOTE: The function currently only handles segments, not individual port
-% codes.
-%
 % Usage:
 %   >> events = cl_evtparser(filepath, segments)
 %   >> events = cl_evtparser('subject101.evt', {'Clean Closed', 'Clean Open'})
@@ -15,6 +12,9 @@
 % Inputs:
 % filepath: Path to the .evt file we're processing.
 % 
+% use_segs: Boolean specifying whether to only extract segments in the recording
+%           marked off in the recording by strings passed in the next parameter.
+%
 % segments: A MATLAB cell that contains the names of the segments we want to
 %           extract.
 % 
@@ -30,24 +30,30 @@
 %   latency
 %   urevent
 
-function events = cl_EMSEevtparser(filepath, segments)
+function events = cl_EMSEevtparser(filepath, use_segs, segments)
     xmlevents = xml2struct(filepath);
     xmlevents = xmlevents.EMSE_Event_List.Event;
 
     n = 1; 
     for i = 1:numel(xmlevents)
-        for j = 1:numel(segments)
-            if strcmp(xmlevents{i}.Name.Text, segments{j})
-                events(n).type    = strcat(xmlevents{i}.Name.Text, '1');
-                events(n).latency = str2double(xmlevents{i}.Start.Text);
-                events(n).urevent = n;
+        if use_segs == true
+            for j = 1:numel(segments)
+                if strcmp(xmlevents{i}.Name.Text, segments{j})
+                    events(n).type    = strcat(xmlevents{i}.Name.Text, '1');
+                    events(n).latency = str2double(xmlevents{i}.Start.Text);
+                    events(n).urevent = n;
 
-                n = n + 1;
-                events(n).type    = strcat(xmlevents{i}.Name.Text, '2');
-                events(n).latency = str2double(xmlevents{i}.Stop.Text);
-                events(n).urevent = n;
-                n = n + 1;
+                    n = n + 1;
+                    events(n).type    = strcat(xmlevents{i}.Name.Text, '2');
+                    events(n).latency = str2double(xmlevents{i}.Stop.Text);
+                    events(n).urevent = n;
+                    n = n + 1;
+                end
             end
+        else
+            events(i).type    = strcat(xmlevents{i}.Name.Text, '1');
+            events(i).latency = str2double(xmlevents{i}.Start.Text);
+            events(i).urevent = i;
         end
     end
 end

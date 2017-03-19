@@ -8,18 +8,18 @@
 % Usage:
 %   >> events = cl_BESAevtparser(filepath, segments)
 %   >> events = cl_BESAevtparser('subject101.evt', {'Clean Closed', 'Clean Open'})
-% 
+%
 % Inputs:
 % filepath: Path to the .evt file we're processing.
-% 
+%
 % segments: A MATLAB cell that contains the names of the segments we want to
 %           extract.
-% 
+%
 % Outputs:
-% events: An array of structures that match that of EEG.event. Note that 
+% events: An array of structures that match that of EEG.event. Note that
 %         segments found in the EVT file get broken up into a start and end.
 %         cl_evtparser appends either '1' or '2' to the end of the event, for
-%         start and stop, respectively. 
+%         start and stop, respectively.
 %
 % >> cl_BESAevtparser(...);
 % 1x56 struct array with fields:
