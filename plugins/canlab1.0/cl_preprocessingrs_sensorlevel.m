@@ -1,17 +1,14 @@
-% Preprocessing script for the original sensor-level data, for
+% Preprocessing script for the resting-state sensor-level data, for
 % computing spectral slopes. Prior to running, change the parameters
-% below.
+% below. Note that event-related information is handled after
+% preprocessing, in Python.
 %
 % Usage:
 %   >> cl_preprocessingoriginal
 %
 % Parameters:
-% importpath_set: String, specifies the absolute path to the .set files which
-%                         contain the original, 66-channel full recordings.
-%
-% importpath_evt: String, specifies the absolute path to the .evt files which
-%                         contain EMSE-exported event-related information, such
-%                         as clean segments in the data.
+% importpath_cnt: String, specifies the absolute path to the .cnt files which
+%                         contain the raw, unprocessed recordings.
 %
 % exportpath_set: String, specifies the absolute path to the .set files produced
 %                         at the end of the preprocessing pipeline.
@@ -21,18 +18,15 @@
 %                         into Python.
 %
 % montage: String, specifies the montage to use. Options:
-%                   'stdClinicalCh': Exclude all channels except those that make
-%                                    up the Standard Clinical Montage (19 channels)
-%                   'extClinicalCh': Exclude only the following channels: electrodes
-%                                    that monitor eye activity, mastoid (reference
-%                                    electodes), and electrodes that fall further 
-%                                    down the head than what the standard clinical 
-%                                    montage uses. We thus get a montage similar to
-%                                    the standard clinical one -- the difference
-%                                    being that this one is denser.
-%
-% segments: Cell of strings, specifies the events to extract from the EMSE .evt 
-%                            files. For resting state, this is usually {'C', 'O'}.
+%               'stdClinicalCh': Exclude all channels except those that make
+%                                up the Standard Clinical Montage (19 channels)
+%               'extClinicalCh': Exclude only the following channels: electrodes
+%                                that monitor eye activity, mastoid (reference
+%                                electodes), and electrodes that fall further 
+%                                down the head than what the standard clinical 
+%                                montage uses. We thus get a montage similar to
+%                                the standard clinical one -- the difference
+%                                being that this one is denser.
 %
 % filter_lofreq: Scalar, specifies the lower bound of the bandpass filter.
 %
@@ -48,14 +42,12 @@
 % custom_cluster: Array of structs, optional, use only if preset_cluster is set to
 %                 'custom'. See cl_cluster.m for more information.
 
-importpath_set = '';
-importpath_evt = '';
+importpath_cnt = '';
 
 exportpath_set = '';
 exportpath_mat = '';
 
 montage = '';
-segments = {'C', 'O'};
 filter_lofreq = 0.5;
 filter_hifreq = 45;
 reference = 'CAR';
@@ -65,8 +57,8 @@ custom_cluster = struct();
 % Import raw cnt data
 cl_importcnt(importpath_cnt, exportpath_set);
 
-% Add event-related information to identify clean segments in data
-cl_modifyeventsEMSE(exportpath_set, importpath_evt, exportpath_set, segments);
+% Modify recording montage
+cl_montage(exportpath_set, exportpath_set, montage);
 
 % Apply 0.5 - 45 Hz bandpass filter
 cl_bandpassfilter(exportpath_set, exportpath_set, filter_lofreq, filter_hifreq);
