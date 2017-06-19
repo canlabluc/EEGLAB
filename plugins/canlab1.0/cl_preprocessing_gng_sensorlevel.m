@@ -35,30 +35,36 @@
 % reference: String, specifies the reference we rereference to during preprocessing.
 %                    Only supported option is currently 'CAR' for the common average.
 %
-% preset_cluster: String, specifies the clusters to construct from the data. Options
+% preset_clusters: String, specifies the clusters to construct from the data. Options
 %                         are '10-20-dense', '10-20-sparse', or 'custom'. See
 %                         cl_clusters.m for more information.
 %
-% custom_cluster: Array of structs, optional, use only if preset_cluster is set to
-%                 'custom'. See cl_cluster.m for more information.
+% custom_clusters: Array of structs, optional, use only if preset_clusters is set to
+%                 'custom'. See cl_clusters.m for more information.
 
-importpath_bdf = '';
+%% Parameters
 
-exportpath_set = '';
-exportpath_mat = '';
+importpath_bdf = '/Volumes/T3/_psd-slope-analogy/data/processing/bdf/';
+
+exportpath_set = '/Volumes/T3/_psd-slope-analogy/data/final/ExclFiltCARClust-set/';
+exportpath_mat = '/Volumes/T3/_psd-slope-analogy/data/final/ExclFiltCARClust-mat/';
 
 montage = '';
 filter_lofreq = 0.5;
 filter_hifreq = 45;
 reference = 'CAR';
-preset_cluster = '';
-custom_cluster = struct();
+preset_clusters = '10-20-dense';
+custom_clusters = struct();
+
+%% Script
 
 % Import raw cnt data
 cl_importbdf(importpath_bdf, exportpath_set);
 
 % Modify recording montage
-cl_montage(exportpath_set, exportpath_set, montage);
+if ~strcmp(montage, '')
+    cl_montage(exportpath_set, exportpath_set, montage);
+end
 
 % Apply 0.5 - 45 Hz bandpass filter
 cl_bandpassfilter(exportpath_set, exportpath_set, filter_lofreq, filter_hifreq);
@@ -67,7 +73,9 @@ cl_bandpassfilter(exportpath_set, exportpath_set, filter_lofreq, filter_hifreq);
 cl_rereference(exportpath_set, exportpath_set, reference);
 
 % Construct clusters
-cl_clusters(exportpath_set, exportpath_set, preset_clusters, custom_cluster);
+if ~strcmp(preset_clusters, '')
+    cl_clusters(exportpath_set, exportpath_set, preset_clusters, custom_clusters);
+end
 
 % Convert files to .mat format for importing into Python
 set_mat_converter(exportpath_set, exportpath_mat);

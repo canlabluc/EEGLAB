@@ -15,5 +15,6 @@ for id = 1:numel(files)
     srate = EEG.srate;
     data  = EEG.data;
     evts  = EEG.event;
-    save(strcat(exportpath, '/', files(id).name(1:end-4), '.mat'), 'name', 'srate', 'data', 'evts'); 
+    chans = {EEG.chanlocs.labels};
+    save(strcat(exportpath, '/', files(id).name(1:end-4), '.mat'), 'name', 'srate', 'data', 'evts', 'chans'); 
 end

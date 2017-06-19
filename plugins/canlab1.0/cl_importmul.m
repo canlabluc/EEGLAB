@@ -1,5 +1,7 @@
 % Imports mul files from BESA, utilizing corresponding .set files to
 % first acquire subject information and build a starting EEG object.
+% Note that BESA exports the three vector components of each source,
+% making it necessary to compute the original vector.
 %
 % Usage:
 %   >> cl_importmul(importpath_mul, importpath_cnt, exportpath)
