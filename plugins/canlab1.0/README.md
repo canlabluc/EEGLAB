@@ -20,6 +20,9 @@ The preprocessing scripts that are currently available are:
 # Examples
 Suppose we want to measure [neural noise](http://voyteklab.com/wp-content/uploads/Voytek-JNeurosci2015.pdf) across all of our participants in the 120 study during resting state. We start off with a set of raw .CNT files and a set of raw .EVT files (both exported from EMSE). First, set up a directory for the project data. 
 
+TODO:
+------------------------------
+
 | Algorithm Implementation | Paper |
 | -------------------------|-------|
 | [`cl_alpha3alpha2.m`](https://github.com/canlabluc/EEGLAB/blob/master/plugins/canlab1.0/cl_alpha3alpha2.m) | [Moretti et al. (2013)](http://www.frontiersin.org/Journal/DownloadFile.ashx?pdf=1&FileId=34165&articleId=65285&ContentTypeId=21&FileName=fnagi-05-00063.pdf&Version=1) |
