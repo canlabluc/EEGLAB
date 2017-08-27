@@ -44,10 +44,10 @@
 
 %% Parameters
 
-importpath_bdf = '/Volumes/T3/_psd-slope-analogy/data/processing/bdf/';
+importpath_bdf = '';
 
-exportpath_set = '/Volumes/T3/_psd-slope-analogy/data/final/ExclFiltCARClust-set/';
-exportpath_mat = '/Volumes/T3/_psd-slope-analogy/data/final/ExclFiltCARClust-mat/';
+exportpath_set = '';
+exportpath_mat = '';
 
 montage = '';
 filter_lofreq = 0.5;

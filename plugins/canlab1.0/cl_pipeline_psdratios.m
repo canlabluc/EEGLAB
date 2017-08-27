@@ -1,4 +1,5 @@
-% Runs through the entire pipeline.
+% Runs through the entire pipeline for calculating either one of the
+% power spectral density ratios (cl_alpha3alpha2.m or cl_alphatheta.m).
 %
 % Usage:
 %  >> cl_pipeline(importpath, exportpath, params)
@@ -30,7 +31,7 @@
 % subj: An array of structures, one for each subject that is processed. The
 %       structure contains all of the results of the analysis.
 
-function subj = cl_pipeline(importpath, exportpath, params)
+function subj = cl_pipeline_psdratios(importpath, exportpath, params)
 
 % Check that importpath, exportpath, and params.analysis are valid
 if (~exist('importpath', 'var')) || strcmp(importpath, '')

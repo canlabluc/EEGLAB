@@ -45,10 +45,10 @@
 
 %% Parameters
 
-importpath_cnt = '/Users/jorge/psd-slope-rs-gng/data/raw-cnt/';
+importpath_cnt = '';
 
-exportpath_set = '/Users/jorge/psd-slope-rs-gng/data/ExclFiltCARClust-set/';
-exportpath_mat = '/Users/jorge/psd-slope-rs-gng/data/ExclFiltCARClust-mat/';
+exportpath_set = '';
+exportpath_mat = '';
 
 montage = '';
 filter_lofreq = 0.5;
@@ -75,7 +75,7 @@ cl_rereference(exportpath_set, exportpath_set, reference);
 
 % Construct clusters
 if ~strcmp(preset_clusters, '')
-    cl_clusters(exportpath_set, exportpath_set, preset_clusters, custom_cluster);
+    cl_clusters(exportpath_set, exportpath_set, preset_clusters, custom_clusters);
 end
 
 % Convert files to .mat format for importing into Python
