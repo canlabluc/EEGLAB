@@ -62,9 +62,12 @@ EEG = eeg_emptyset;
 
 % convert to seconds for sread
 % ----------------------------
-EEG.nbchan          = size(DAT,1);
+if max(dat.InChanSelect) > size(DAT,1)
+    dat.InChanSelect = [1:size(DAT,1)];
+end;
+EEG.nbchan          = length(dat.InChanSelect); %= size(DAT,1);
 EEG.srate           = dat.SampleRate(1);
-EEG.data            = DAT; 
+EEG.data            = DAT(dat.InChanSelect,:);  %DAT
 clear DAT;
 % try  % why would you do the following???????  JO
 %     EEG.data            = EEG.data';

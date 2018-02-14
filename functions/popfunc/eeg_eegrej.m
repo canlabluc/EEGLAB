@@ -92,7 +92,11 @@ end
 
 if isfield(EEG.event, 'latency'),
    	 tmpevent = EEG.event;
+     
+     tmpdata = EEG.data; % REMOVE THIS, THIS IS FOR DEBUGGING %
+     
      tmpalllatencies = [ tmpevent.latency ];
+
 else tmpalllatencies = []; 
 end;
 
@@ -101,18 +105,77 @@ end;
 if size(regions,2) > 2, regions = regions(:, 3:4); end;
 regions = combineregions(regions);
 
-[EEG.data EEG.xmax tmpalllatencies boundevents] = eegrej( EEG.data, ...
-												  regions, EEG.xmax-EEG.xmin, tmpalllatencies);
+[EEG.data, EEG.xmax, event2, boundevents] = eegrej( EEG.data, regions, EEG.xmax-EEG.xmin, EEG.event);
 oldEEGpnts = EEG.pnts;
+oldEEGevents = EEG.event;
 EEG.pnts   = size(EEG.data,2);
 EEG.xmax   = EEG.xmax+EEG.xmin;
 
 % add boundary events
 % -------------------
-if ~isempty(boundevents) % boundevent latencies will be recomputed in the function below
-    [ EEG.event ] = eeg_insertbound(EEG.event, oldEEGpnts, regions);
-    EEG = eeg_checkset(EEG, 'eventconsistency');
+[ EEG.event ] = eeg_insertbound(EEG.event, oldEEGpnts, regions);
+EEG = eeg_checkset(EEG, 'eventconsistency');
+if ~isempty(EEG.event) && EEG.trials == 1 && EEG.event(end).latency > EEG.pnts
+    EEG.event(end) = []; % remove last event if necessary
 end;
+
+% double check event latencies
+% the function that insert boundary events and recompute latency is
+% delicate so we do it twice using different methods and check
+% the results. It is longer, but accuracy is paramount.
+if isfield(EEG.event, 'latency') && length(EEG.event) < 3000
+    % assess difference between old and new event latencies
+    [ eventtmp ] = eeg_insertboundold(oldEEGevents, oldEEGpnts, regions);
+    if ~isempty(eventtmp) && length(eventtmp) > length(EEG.event) && isfield(eventtmp, 'type') && isequal(eventtmp(1).type, 'boundary')
+        eventtmp(1) = [];
+    end
+    if isfield(eventtmp, 'duration')
+        for iEvent=1:length(eventtmp)
+            if isempty(eventtmp(iEvent).duration)
+                eventtmp(iEvent).duration = 0;
+            end
+        end
+    end
+    differs = 0;
+    for iEvent=1:min(length(EEG.event), length(eventtmp)-1)
+        if ~issameevent(EEG.event(iEvent), eventtmp(iEvent)) && ~issameevent(EEG.event(iEvent), eventtmp(iEvent+1)) 
+            differs = differs+1;
+        end
+    end
+    if 100*differs/length(EEG.event) > 50
+        fprintf(['BUG 1971 WARNING: IF YOU ARE USING A SCRIPT WITTEN FOR A PREVIOUS VERSION OF\n' ...
+                'EEGLAB TO CALL THIS FUNCTION, BECAUSE YOU ARE REJECTING THE ONSET OF THE DATA,\n' ...
+                'EVENTS WERE CORRUPTED. EVENT LATENCIES ARE NOW CORRECT (SEE https://sccn.ucsd.edu/wiki/EEGLAB_bug1971);\n' ]);
+    end
+    
+    alllats = [ EEG.event.latency ];
+    if ~isempty(event2)
+        otherlatencies = [event2.latency];
+        if ~isequal(alllats, otherlatencies)
+            warning([ 'Discrepency when recomputing event latency.' 10 'Try to reproduce the problem and send us your dataset' ]);
+        end
+    end
+end
+
+% double check boundary event latencies
+if ~isempty(EEG.event) && length(EEG.event) < 3000 && ischar(EEG.event(1).type) && isfield(EEG.event, 'duration') && isfield(event2, 'duration')
+    try
+        indBound1 = find(cellfun(@(x)strcmpi(num2str(x), 'boundary'), { EEG.event(:).type }));
+        indBound2 = find(cellfun(@(x)strcmpi(num2str(x), 'boundary'), { event2(:).type }));
+        duration1 = [EEG.event(indBound1).duration]; duration1(isnan(duration1)) = [];
+        duration2 = [event2(indBound2).duration]; duration2(isnan(duration2)) = [];
+        if ~isequal(duration1, duration2)
+            warning(['Inconsistency in boundary event duration.' 10 'Try to reproduce the problem and send us your dataset' ]); 
+        end;
+    catch, warning('Unknown error when checking event latency - please send us your dataset');
+    end;
+end;
+
+% debuging code below
+% regions, n1 = 1525; n2 = 1545; n = n2-n1+1;
+% a = zeros(1,n); a(:) = 1; a(strmatch('boundary', { event2(n1:n2).type })') = 8; 
+% [[n1:n2]' alllats(n1:n2)' [event2(n1:n2).latency]' alllats(n1:n2)'-[event2(n1:n2).latency]' otherorilatencies(n1:n2)' a']
+% figure; ev = 17; range = [-1000:1000]; plot(EEG.data(1,EEG.event(ev).latency+range)); hold on; plot(tmpdata(1,tmpevent(EEG.event(ev).urevent).latency+range+696), 'r'); grid on;
 
 com = sprintf('%s = eeg_eegrej( %s, %s);', inputname(1), inputname(1), vararg2str({ regions })); 
 
@@ -129,6 +192,21 @@ com = sprintf('%s = eeg_eegrej( %s, %s);', inputname(1), inputname(1), vararg2st
 %         newregions(index,:)   = [];
 %     end;
 % end;
+
+function res = issameevent(evt1, evt2)
+
+res = true;
+if isequal(evt1,evt2)
+    return;
+elseif isfield(evt1, 'duration') && isnan(evt1.duration) && isfield(evt2, 'duration') && isnan(evt2.duration)
+    evt1.duration = 1;
+    evt2.duration = 1;
+    if isequal(evt1,evt2)
+        return;
+    end;
+end;
+res = false;
+return;
 
 function newregions = combineregions(regions)
 % 9/1/2014 RMC

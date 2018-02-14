@@ -4,7 +4,7 @@
 % preprocessing, in Python.
 %
 % Usage:
-%   >> cl_preprocessingoriginal
+%   >> cl_preprocessing_rs_sensorlevel
 %
 % Parameters:
 % importpath_cnt: String, specifies the absolute path to the .cnt files which
