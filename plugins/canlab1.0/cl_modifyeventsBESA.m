@@ -16,11 +16,6 @@
 %             if the recording contains eye blinks, setting clean_only to true will
 %             return segments between blinks.
 
-% 1. Find start_idx
-% 2. Remove events that are not blinks or artifacts, then remove everything prior
-%    to start_idx
-% 3. Check that coding is consistent
-% 4. Extract clean segments
 function eeg_event = cl_modifyeventsBESA(importpath_set, importpath_evt, exportpath)
 
 files_set = dir(strcat(importpath_set, '/*.set'));
