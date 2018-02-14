@@ -2,8 +2,9 @@
 % .evt's
 %
 % Usage: 
-%   >> cl_modifyevents(importpath_set, importpath_evt, exportpath, segments);
-%   >> cl_modifyevents('raw-set', 'raw-evt', '~/Desktop', {'Closed', 'Open'});
+%   >> cl_modifyevents(importpath_set, importpath_evt, exportpath);
+% e.g,
+%   >> cl_modifyevents('raw-set', 'raw-evt', '~/Desktop/output/');
 %
 % Inputs:
 % importpath_set: Import path for EEGLAB .set files.
