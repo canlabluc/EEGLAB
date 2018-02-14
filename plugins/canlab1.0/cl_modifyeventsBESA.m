@@ -11,10 +11,6 @@
 % importpath_evt: Import path for BESA-exported .evt files.
 %
 % exportpath: Export folder for modified .set files.
-%
-% clean_only: Boolean, specifies whether to only return clean segments. For example,
-%             if the recording contains eye blinks, setting clean_only to true will
-%             return segments between blinks.
 
 function eeg_event = cl_modifyeventsBESA(importpath_set, importpath_evt, exportpath)
 
