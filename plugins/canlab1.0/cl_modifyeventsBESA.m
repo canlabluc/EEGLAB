@@ -13,7 +13,7 @@
 %
 % exportpath: Export folder for modified .set files.
 
-function eeg_event = cl_modifyeventsBESA(importpath_set, importpath_evt, exportpath)
+function cl_modifyeventsBESA(importpath_set, importpath_evt, exportpath)
 
 files_set = dir(strcat(importpath_set, '/*.set'));
 files_evt = dir(strcat(importpath_evt, '/*.evt'));
