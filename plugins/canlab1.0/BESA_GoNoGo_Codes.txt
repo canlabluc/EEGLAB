@@ -1,0 +1,25 @@
+The following are the codes BESA outputs for .evt files and their corresponding
+meanings, for the Go-NoGo task. Also see [0] for an example of a Python script
+that processes these into a more usable format.
+-------------------------------------------------------------------------------
+
+Under the 'Code' column:
+	41: Invalid
+	11: Blink start - note that only the start of a blink is marked, so if your
+	analysis needs to fully exclude blinks, a buffer period needs to be added after
+	this. I've used a 400ms buffer in the past by adding a '12' event marking Blink
+	stops 205 sampling points after a detected '11'.
+	21: Artifact start
+	22: Artifact end
+
+Under the 'Trigger' column:
+	11: Fixation
+	21: Go prompt
+	22: NoGo prompt
+  255: Start block of trials
+  1: Subject response during Go/NoGo trial
+  32: Incorrect response
+  33: No response
+
+-------------------------------------------------------------------------------
+[0]: https://github.com/canlabluc/psd-slope-rs-gng/blob/master/src/gng/preprocessing/cl_evtBESAPreprocessor.py

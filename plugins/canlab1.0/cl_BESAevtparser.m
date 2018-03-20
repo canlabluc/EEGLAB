@@ -7,7 +7,6 @@
 %
 % Usage:
 %   >> events = cl_BESAevtparser(filepath, segments)
-%   >> events = cl_BESAevtparser('subject101.evt', {'Clean Closed', 'Clean Open'})
 %
 % Inputs:
 % filepath: Path to the .evt file we're processing.
