@@ -1,0 +1,89 @@
+On analytic flexibility and pre-registration
+============================================
+
+How it impacts my field:
+- In systems neuro, there's just such a huge amount of data that you're bound to
+find things that correlate. For example, say we record from 1,000 neurons
+simultaneously and find that 165 of them are incredibly "selective" for a
+decision. Is this 165 number surprising? Or not surprising? Did we expect them
+to be selective in the specific ways in which they were?
+
+- Unclear to me when something is postdiction and when something is prediction,
+still. Is the difference simply that the experiment and analysis was
+specifically specified ahead of time, for that finding?
+
+-- Seminar --
+Problem not just with having analytic flexibility -- specifically, with having
+it while looking at data
+- Stopping criteria -- when to stop data collection
+- Exclusion -- what data is excluded?
+- Analysis choices -- which covariates, raw, normalized?
+- Which is the 'key' DV?
+
+Hard thing: counting the things that you decided not to consider, from looking
+at the data -- what things did you deem "uninteresting"?
+
+Are you still falling into the issue at hand here, even after performing
+multiple comparisons correction? Probably. Really the issue is that we shouldn't
+confuse prediction and postdiction.
+
+
+What's the issue with not ~utilizing all~ of our variables?
+- Well, it depends on what you want to do. If your goal is just estimating the
+effect for all of these variables, maybe all of them are small.
+
+Soln to the problem:
+	1. Exploratory work -- e.g. gain expertise
+	2. Specify model, relationship between variables. Fully operationalized,
+	quantified. Could be a full-blown computational model, w/e. We want to form a
+	hypothesis.
+	3. Test prediction -- make an experiment, collect the data, test 2.
+
+Important to emphasize that pre-registration does not address psychopathic
+behavior -- aims at scientists that are perhaps unknowingly perpetuating bad
+practices.
+
+Pre-registartion is in one way trying to get back to the days of considering
+ideas simply by themselves -- apart from the data.
+
+Also, pre-reg is good for null results! Ameliorates people going on and on with
+finding a new idea that's already been thought of but failed.
+
+Pre-reg template for psych studies: van 't Veer A.E., Giner-Sorolla, 2016
+
+-- One issue with pre-reg: people are going to look at my pre-regs and do the
+same experiment!
+
+Issue: cogneuro and sysneuro doesn't have a prereg template
+
+In another way pre-registration is about shedding light on the process of
+science prior to the paper and publishing. How decisions were made prior to all
+of this.
+
+How do you generate preprocessing streams which do not relate to your hypothesis
+in any way? Is this possible?
+
+Important to do internal replications -- separate the pilot data from the actual
+experiment! On separate subjects, separate exp, w/e.
+
+One thing I'd like to see more in sysneuro is some kind of prediction about the
+number of neurons you'd perhaps see that respond, and also in what specific way
+to specific stimuli.
+	- Quite obvious that you get action-related signal throughout e.g. the entire
+	brain, so how useful is it to say "there are decision-making neurons here"?
+
+	- Quite problematic that people don't preregister with sysneuro -- you end up
+	going into a certain region and you're probably bound to find neurons that
+	respond in some way to whatever stimulus you're showing.
+Issue of letting your data guide your hypothesis testing is problematic because
+of this.
+
+
+
+
+
+
+
+
+
+

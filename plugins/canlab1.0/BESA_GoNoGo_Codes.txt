@@ -4,7 +4,7 @@ that processes these into a more usable format.
 -------------------------------------------------------------------------------
 
 Under the 'Code' column:
-	41: Invalid
+	41: Datetime stamp for that file
 	11: Blink start - note that only the start of a blink is marked, so if your
 	analysis needs to fully exclude blinks, a buffer period needs to be added after
 	this. I've used a 400ms buffer in the past by adding a '12' event marking Blink

@@ -26,8 +26,15 @@
 %   latency
 %   urevent
 
+code_mappings = {
+	
+
+	
+};
+
+
 % Note that we assume that this is a consolidated file from the python scripts.
-function events = cl_BESAevtparser(filepath)
+function events = cl_BESAevtparser(filepath, code_mappings)
 
 evts = tdfread(filepath);
 for i = 1:numel(evts.Latency)
@@ -36,3 +43,15 @@ for i = 1:numel(evts.Latency)
     events(i).urevent = i;
 end
 end
+
+% Read in file and downsample latencies to 512 Hz
+evts = readBESAevt(filepath);
+evts(:,1) = round( evts(:,1)/10e6 ) * 512;
+
+% Cut out events which do not contain one of the codes specified in
+% code_mappings
+extractable_codes = code_mappings
+
+% Build events struct array
+for i = 1 : 
+
